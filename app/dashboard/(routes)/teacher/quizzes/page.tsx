@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Search, Plus, Edit, Eye, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigationRouter } from "@/lib/hooks/use-navigation-router";
+import { useLanguage } from "@/lib/contexts/language-context";
 
 interface Quiz {
     id: string;
@@ -36,6 +37,7 @@ interface Question {
 }
 
 const QuizzesPage = () => {
+    const { t } = useLanguage();
     const router = useNavigationRouter();
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [loading, setLoading] = useState(true);
@@ -61,7 +63,7 @@ const QuizzesPage = () => {
     };
 
     const handleDeleteQuiz = async (quiz: Quiz) => {
-        if (!confirm("هل أنت متأكد من حذف هذا الاختبار؟")) {
+        if (!confirm(t("teacher.quizzes.deleteConfirm"))) {
             return;
         }
 
@@ -72,14 +74,14 @@ const QuizzesPage = () => {
             });
 
             if (response.ok) {
-                toast.success("تم حذف الاختبار بنجاح");
+                toast.success(t("teacher.quizzes.deleteSuccess"));
                 fetchQuizzes();
             } else {
-                toast.error("حدث خطأ أثناء حذف الاختبار");
+                toast.error(t("teacher.quizzes.deleteError"));
             }
         } catch (error) {
             console.error("Error deleting quiz:", error);
-            toast.error("حدث خطأ أثناء حذف الاختبار");
+            toast.error(t("teacher.quizzes.deleteError"));
         } finally {
             setIsDeleting(null);
         }
@@ -97,7 +99,7 @@ const QuizzesPage = () => {
     if (loading) {
         return (
             <div className="p-6">
-                <div className="text-center">جاري التحميل...</div>
+                <div className="text-center">{t("common.loading")}</div>
             </div>
         );
     }
@@ -106,21 +108,21 @@ const QuizzesPage = () => {
         <div className="p-6 space-y-6">
                         <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    إدارة الاختبارات
+                    {t("teacher.quizzes.title")}
                 </h1>
                 <Button onClick={() => router.push("/dashboard/teacher/quizzes/create")} className="bg-brand hover:bg-brand/90 text-white">
                     <Plus className="h-4 w-4 mr-2" />
-                    إنشاء اختبار جديد
+                    {t("teacher.quizzes.createNew")}
                 </Button>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>الاختبارات</CardTitle>
+                    <CardTitle>{t("sidebar.teacher.quizzes")}</CardTitle>
                     <div className="flex items-center space-x-2">
                         <Search className="h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="البحث في الاختبارات..."
+                            placeholder={t("teacher.quizzes.searchPlaceholder")}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="max-w-sm"
@@ -131,13 +133,13 @@ const QuizzesPage = () => {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="text-right">عنوان الاختبار</TableHead>
-                                <TableHead className="text-right">الكورس</TableHead>
-                                <TableHead className="text-right">الموقع</TableHead>
-                                <TableHead className="text-right">الحالة</TableHead>
-                                <TableHead className="text-right">عدد الأسئلة</TableHead>
-                                <TableHead className="text-right">تاريخ الإنشاء</TableHead>
-                                <TableHead className="text-right">الإجراءات</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.quizzes.table.quizTitle")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.quizzes.table.course")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.quizzes.table.position")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.quizzes.table.status")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.quizzes.table.questionsCount")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.quizzes.table.createdAt")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.quizzes.table.actions")}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -158,12 +160,12 @@ const QuizzesPage = () => {
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant={quiz.isPublished ? "default" : "secondary"}>
-                                            {quiz.isPublished ? "منشور" : "مسودة"}
+                                            {quiz.isPublished ? t("teacher.quizzes.status.published") : t("teacher.quizzes.status.draft")}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant="secondary">
-                                            {quiz.questions.length} سؤال
+                                            {quiz.questions.length} {t("homepage.quiz")}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
@@ -177,7 +179,7 @@ const QuizzesPage = () => {
                                                 onClick={() => handleViewQuiz(quiz)}
                                             >
                                                 <Eye className="h-4 w-4" />
-                                                عرض
+                                                {t("teacher.quizzes.actions.view")}
                                             </Button>
                                             <Button 
                                                 size="sm" 
@@ -185,7 +187,7 @@ const QuizzesPage = () => {
                                                 onClick={() => router.push(`/dashboard/teacher/quizzes/${quiz.id}/edit`)}
                                             >
                                                 <Edit className="h-4 w-4" />
-                                                تعديل
+                                                {t("teacher.quizzes.actions.edit")}
                                             </Button>
                                             <Button 
                                                 size="sm" 
@@ -203,15 +205,15 @@ const QuizzesPage = () => {
                                                             }),
                                                         });
                                                         if (response.ok) {
-                                                            toast.success(quiz.isPublished ? "تم إلغاء النشر" : "تم النشر بنجاح");
+                                                            toast.success(quiz.isPublished ? t("teacher.quizzes.unpublishSuccess") : t("teacher.quizzes.publishSuccess"));
                                                             fetchQuizzes();
                                                         }
                                                     } catch (error) {
-                                                        toast.error("حدث خطأ");
+                                                        toast.error(t("teacher.quizzes.publishError"));
                                                     }
                                                 }}
                                             >
-                                                {quiz.isPublished ? "إلغاء النشر" : "نشر"}
+                                                {quiz.isPublished ? t("teacher.quizzes.actions.unpublish") : t("teacher.quizzes.actions.publish")}
                                             </Button>
 
                                             <Button 
@@ -221,7 +223,7 @@ const QuizzesPage = () => {
                                                 disabled={isDeleting === quiz.id}
                                             >
                                                 <Trash2 className="h-4 w-4" />
-                                                {isDeleting === quiz.id ? "جاري الحذف..." : "حذف"}
+                                                {isDeleting === quiz.id ? t("teacher.quizzes.actions.deleting") : t("teacher.quizzes.actions.delete")}
                                             </Button>
                                         </div>
                                     </TableCell>

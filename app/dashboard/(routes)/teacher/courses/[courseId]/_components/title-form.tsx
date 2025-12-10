@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useLanguage } from "@/lib/contexts/language-context";
 
 interface TitleFormProps {
     initialData: {
@@ -37,7 +38,7 @@ export const TitleForm = ({
     initialData,
     courseId
 }: TitleFormProps) => {
-
+    const { t } = useLanguage();
     const [isEditing, setIsEditing] = useState(false);
 
     const toggleEdit = () => setIsEditing((current) => !current);
@@ -54,30 +55,30 @@ export const TitleForm = ({
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
             await axios.patch(`/api/courses/${courseId}`, values);
-            toast.success("تم تحديث الكورس");
+            toast.success(t("teacher.courseEdit.forms.updateSuccess"));
             toggleEdit();
             router.refresh();
         } catch {
-            toast.error("حدث خطأ");
+            toast.error(t("teacher.courseEdit.forms.updateError"));
         }
     }
 
     return (
         <div className="mt-6 border bg-card rounded-md p-4">
             <div className="font-medium flex items-center justify-between">
-                عنوان الكورس
+                {t("teacher.courseEdit.forms.courseTitle")}
                 <Button onClick={toggleEdit} variant="ghost">
-                    {isEditing && (<>إلغاء</>)}
+                    {isEditing && (<>{t("common.cancel")}</>)}
                     {!isEditing && (
                     <>
                         <Pencil className="h-4 w-4 mr-2" />
-                        تعديل العنوان
+                        {t("teacher.courseEdit.forms.editTitle")}
                     </>)}
                 </Button>
             </div>
             {!isEditing && (
                 <p className="text-sm mt-2 text-muted-foreground">
-                    {initialData.title}
+                    {initialData.title || t("teacher.courseEdit.forms.noTitle")}
                 </p>
             )}
 
@@ -102,7 +103,7 @@ export const TitleForm = ({
                         />
                         <div className="flex items-center gap-x-2">
                             <Button disabled={!isValid || isSubmitting} type="submit">
-                                حفظ
+                                {t("common.save")}
                             </Button>
                         </div>
                     </form>

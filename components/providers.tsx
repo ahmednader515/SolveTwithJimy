@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { RTLProvider } from "@/components/providers/rtl-provider";
 import { ThemeProvider as BrandThemeProvider } from "@/components/theme-provider";
 import { NavigationProvider } from "@/lib/contexts/navigation-context";
+import { LanguageProvider } from "@/lib/contexts/language-context";
 import { useEffect } from "react";
 
 // Component to handle session loading states
@@ -31,22 +32,24 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
       refetchWhenOffline={false} // Don't refetch when offline
     >
       <SessionHandler>
-        <RTLProvider>
-          <BrandThemeProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="light"
-              enableSystem={false}
-              disableTransitionOnChange
-            >
-              <NavigationProvider>
-                <ToastProvider />
-                {children}
-                <Toaster />
-              </NavigationProvider>
-            </ThemeProvider>
-          </BrandThemeProvider>
-        </RTLProvider>
+        <LanguageProvider>
+          <RTLProvider>
+            <BrandThemeProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="light"
+                enableSystem={false}
+                disableTransitionOnChange
+              >
+                <NavigationProvider>
+                  <ToastProvider />
+                  {children}
+                  <Toaster />
+                </NavigationProvider>
+              </ThemeProvider>
+            </BrandThemeProvider>
+          </RTLProvider>
+        </LanguageProvider>
       </SessionHandler>
     </SessionProvider>
   );

@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/button";
 import { useSession, signOut } from "next-auth/react";
 import { ScrollProgress } from "@/components/scroll-progress";
 import { LogOut } from "lucide-react";
+import { useLanguage } from "@/lib/contexts/language-context";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export const Navbar = () => {
   const { data: session } = useSession();
+  const { t } = useLanguage();
 
   const handleLogout = () => {
     signOut({ callbackUrl: "/" });
@@ -23,8 +26,8 @@ export const Navbar = () => {
             <Image
               src="/logo.png"
               alt="Logo"
-              width={150}
-              height={150}
+              width={100}
+              height={100}
               className="ml-2"
               unoptimized
             />
@@ -32,10 +35,11 @@ export const Navbar = () => {
 
           {/* Right side items */}
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             {!session ? (
               <>
                 <Button className="bg-brand hover:bg-brand/90 text-white" asChild>
-                  <Link href="/sign-up">انشاء الحساب</Link>
+                  <Link href="/sign-up">{t("navigation.signUp")}</Link>
                 </Button>
                 <Button
                   size="sm"
@@ -43,13 +47,13 @@ export const Navbar = () => {
                   asChild
                   className="border-brand text-brand hover:bg-brand/10"
                 >
-                  <Link href="/sign-in">تسجيل الدخول</Link>
+                  <Link href="/sign-in">{t("navigation.signIn")}</Link>
                 </Button>
               </>
             ) : (
               <>
                 <Button variant="ghost" asChild>
-                  <Link href="/dashboard">لوحة التحكم</Link>
+                  <Link href="/dashboard">{t("navigation.dashboard")}</Link>
                 </Button>
                 <Button 
                   size="sm" 
@@ -58,7 +62,7 @@ export const Navbar = () => {
                   className="text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors duration-200 ease-in-out"
                 >
                   <LogOut className="h-4 w-4 rtl:ml-2 ltr:mr-2"/>
-                  تسجيل الخروج
+                  {t("navigation.logout")}
                 </Button>
               </>
             )}

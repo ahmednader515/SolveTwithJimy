@@ -28,6 +28,7 @@ import Link from "next/link";
 import { Pencil, Trash2, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useLanguage } from "@/lib/contexts/language-context";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -51,6 +52,7 @@ export function AdminCoursesTable<TData extends { id: string }, TValue>({
     data,
     hideActions = false,
 }: DataTableProps<TData, TValue>) {
+    const { t } = useLanguage();
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [filterValue, setFilterValue] = useState("");
@@ -83,13 +85,13 @@ export function AdminCoursesTable<TData extends { id: string }, TValue>({
             });
 
             if (!response.ok) {
-                throw new Error("فشل حذف الكورس");
+                throw new Error(t("common.error"));
             }
 
-            toast.success("تم حذف الكورس بنجاح");
+            toast.success(t("common.success"));
             router.refresh();
         } catch {
-            toast.error("حدث خطأ");
+            toast.error(t("common.error"));
         }
     };
 
@@ -99,7 +101,7 @@ export function AdminCoursesTable<TData extends { id: string }, TValue>({
                 <div className="relative w-full max-w-sm">
                     <Search className="absolute h-4 w-4 top-3 left-3 text-muted-foreground" />
                     <Input
-                        placeholder="ابحث عن الكورسات..."
+                        placeholder={t("search.searchPlaceholder")}
                         value={filterValue}
                         onChange={(e) => handleFilterChange(e.target.value)}
                         className="w-full pl-9"
@@ -113,7 +115,7 @@ export function AdminCoursesTable<TData extends { id: string }, TValue>({
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
                                     return (
-                                        <TableHead key={header.id} className="text-right">
+                                        <TableHead key={header.id} className="rtl:text-right ltr:text-left">
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
@@ -157,15 +159,15 @@ export function AdminCoursesTable<TData extends { id: string }, TValue>({
                                                     </AlertDialogTrigger>
                                                     <AlertDialogContent>
                                                         <AlertDialogHeader>
-                                                            <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+                                                            <AlertDialogTitle>{t("common.confirm")}</AlertDialogTitle>
                                                             <AlertDialogDescription>
-                                                                لا يمكن التراجع عن هذا العمل. سيتم حذف الكورس وكل محتواها بشكل دائم.
+                                                                {t("common.delete")}
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
-                                                            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                                                            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                                                             <AlertDialogAction onClick={() => onDelete(row.original.id)}>
-                                                                حذف
+                                                                {t("common.delete")}
                                                             </AlertDialogAction>
                                                         </AlertDialogFooter>
                                                     </AlertDialogContent>
@@ -181,7 +183,7 @@ export function AdminCoursesTable<TData extends { id: string }, TValue>({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    لا يوجد نتائج.
+                                    {t("common.noOptions")}
                                 </TableCell>
                             </TableRow>
                         )}
@@ -195,7 +197,7 @@ export function AdminCoursesTable<TData extends { id: string }, TValue>({
                     onClick={() => table.previousPage()}
                     disabled={!table.getCanPreviousPage()}
                 >
-                    السابق
+                    {t("common.back")}
                 </Button>
                 <Button
                     variant="outline"
@@ -203,7 +205,7 @@ export function AdminCoursesTable<TData extends { id: string }, TValue>({
                     onClick={() => table.nextPage()}
                     disabled={!table.getCanNextPage()}
                 >
-                    التالي
+                    {t("common.next")}
                 </Button>
             </div>
         </div>

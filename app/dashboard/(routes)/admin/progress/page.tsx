@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Search, Eye, BookOpen, CheckCircle, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
+import { useLanguage } from "@/lib/contexts/language-context";
 
 interface User {
     id: string;
@@ -59,6 +60,7 @@ interface Purchase {
 }
 
 const ProgressPage = () => {
+    const { t } = useLanguage();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -126,7 +128,7 @@ const ProgressPage = () => {
     if (loading) {
         return (
             <div className="p-6">
-                <div className="text-center">جاري التحميل...</div>
+                <div className="text-center">{t("common.loading")}</div>
             </div>
         );
     }
@@ -135,17 +137,17 @@ const ProgressPage = () => {
         <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    تقدم الطلاب
+                    {t("admin.progress.title")}
                 </h1>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>قائمة الطلاب</CardTitle>
+                    <CardTitle>{t("admin.progress.studentsTitle")}</CardTitle>
                     <div className="flex items-center space-x-2">
                         <Search className="h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="البحث بالاسم أو رقم الهاتف..."
+                            placeholder={t("admin.progress.searchPlaceholder")}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="max-w-sm"
@@ -156,11 +158,11 @@ const ProgressPage = () => {
                     <Table>
                                                  <TableHeader>
                              <TableRow>
-                                 <TableHead className="text-right">الاسم</TableHead>
-                                 <TableHead className="text-right">رقم الهاتف</TableHead>
-                                 <TableHead className="text-right">الكورسات المشتراة</TableHead>
-                                 <TableHead className="text-right">التقدم</TableHead>
-                                 <TableHead className="text-right">الإجراءات</TableHead>
+                                 <TableHead className="rtl:text-right ltr:text-left">{t("admin.progress.table.name")}</TableHead>
+                                 <TableHead className="rtl:text-right ltr:text-left">{t("admin.progress.table.phoneNumber")}</TableHead>
+                                 <TableHead className="rtl:text-right ltr:text-left">{t("admin.progress.table.purchasedCourses")}</TableHead>
+                                 <TableHead className="rtl:text-right ltr:text-left">{t("admin.progress.table.progress")}</TableHead>
+                                 <TableHead className="rtl:text-right ltr:text-left">{t("admin.progress.table.actions")}</TableHead>
                              </TableRow>
                          </TableHeader>
                         <TableBody>
@@ -172,12 +174,12 @@ const ProgressPage = () => {
                                     <TableCell>{user.phoneNumber}</TableCell>
                                     <TableCell>
                                         <Badge variant="outline">
-                                            {user._count.purchases} كورس
+                                            {user._count.purchases} {t("admin.progress.course")}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant="secondary">
-                                            {user._count.userProgress} فصل
+                                            {user._count.userProgress} {t("admin.progress.chapter")}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
@@ -187,7 +189,7 @@ const ProgressPage = () => {
                                             onClick={() => handleViewProgress(user)}
                                         >
                                             <Eye className="h-4 w-4" />
-                                            عرض التقدم
+                                            {t("admin.progress.viewProgress")}
                                         </Button>
                                     </TableCell>
                                 </TableRow>
@@ -201,34 +203,34 @@ const ProgressPage = () => {
                 <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>
-                            تقدم {selectedUser?.fullName}
+                            {t("admin.progress.dialog.title", { name: selectedUser?.fullName || "" })}
                         </DialogTitle>
                     </DialogHeader>
                     
                     {loadingProgress ? (
-                        <div className="text-center py-8">جاري التحميل...</div>
+                        <div className="text-center py-8">{t("common.loading")}</div>
                     ) : (
                         <div className="space-y-6">
                             {/* Progress Summary */}
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>ملخص التقدم</CardTitle>
+                                    <CardTitle>{t("admin.progress.dialog.summary.title")}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
-                                            <span>نسبة الإنجاز</span>
+                                            <span>{t("admin.progress.dialog.summary.completionRate")}</span>
                                             <span className="font-bold">{progressPercentage.toFixed(1)}%</span>
                                         </div>
                                         <Progress value={progressPercentage} className="w-full" />
                                         <div className="grid grid-cols-2 gap-4 text-center">
                                             <div>
                                                 <div className="text-2xl font-bold text-green-600">{completedProgress}</div>
-                                                <div className="text-sm text-muted-foreground">مكتمل</div>
+                                                <div className="text-sm text-muted-foreground">{t("admin.progress.dialog.summary.completed")}</div>
                                             </div>
                                             <div>
                                                 <div className="text-2xl font-bold text-gray-600">{notStartedChapters}</div>
-                                                <div className="text-sm text-muted-foreground">لم يبدأ</div>
+                                                <div className="text-sm text-muted-foreground">{t("admin.progress.dialog.summary.notStarted")}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -238,16 +240,16 @@ const ProgressPage = () => {
                             {/* Purchased Courses */}
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>الكورسات المشتراة</CardTitle>
+                                    <CardTitle>{t("admin.progress.dialog.purchasedCourses.title")}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <Table>
                                                                                  <TableHeader>
                                              <TableRow>
-                                                 <TableHead className="text-right">اسم الكورس</TableHead>
-                                                 <TableHead className="text-right">السعر</TableHead>
-                                                 <TableHead className="text-right">الحالة</TableHead>
-                                                 <TableHead className="text-right">تاريخ الشراء</TableHead>
+                                                 <TableHead className="rtl:text-right ltr:text-left">{t("admin.progress.dialog.purchasedCourses.courseName")}</TableHead>
+                                                 <TableHead className="rtl:text-right ltr:text-left">{t("admin.progress.dialog.purchasedCourses.price")}</TableHead>
+                                                 <TableHead className="rtl:text-right ltr:text-left">{t("admin.progress.dialog.purchasedCourses.status")}</TableHead>
+                                                 <TableHead className="rtl:text-right ltr:text-left">{t("admin.progress.dialog.purchasedCourses.purchaseDate")}</TableHead>
                                              </TableRow>
                                          </TableHeader>
                                         <TableBody>
@@ -257,11 +259,11 @@ const ProgressPage = () => {
                                                         {purchase.course.title}
                                                     </TableCell>
                                                     <TableCell>
-                                                        {purchase.course.price} جنيه
+                                                        {purchase.course.price} {t("admin.balances.egp")}
                                                     </TableCell>
                                                     <TableCell>
                                                         <Badge variant={purchase.status === "ACTIVE" ? "default" : "secondary"}>
-                                                            {purchase.status === "ACTIVE" ? "نشط" : "غير نشط"}
+                                                            {purchase.status === "ACTIVE" ? t("admin.progress.dialog.purchasedCourses.active") : t("admin.progress.dialog.purchasedCourses.inactive")}
                                                         </Badge>
                                                     </TableCell>
                                                     <TableCell>
@@ -277,16 +279,16 @@ const ProgressPage = () => {
                             {/* Progress Details */}
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>تفاصيل التقدم</CardTitle>
+                                    <CardTitle>{t("admin.progress.dialog.progressDetails.title")}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <Table>
                                                                                  <TableHeader>
                                              <TableRow>
-                                                 <TableHead className="text-right">الكورس</TableHead>
-                                                 <TableHead className="text-right">الفصل</TableHead>
-                                                 <TableHead className="text-right">الحالة</TableHead>
-                                                 <TableHead className="text-right">آخر تحديث</TableHead>
+                                                 <TableHead className="rtl:text-right ltr:text-left">{t("admin.progress.dialog.progressDetails.course")}</TableHead>
+                                                 <TableHead className="rtl:text-right ltr:text-left">{t("admin.progress.dialog.progressDetails.chapter")}</TableHead>
+                                                 <TableHead className="rtl:text-right ltr:text-left">{t("admin.progress.dialog.progressDetails.status")}</TableHead>
+                                                 <TableHead className="rtl:text-right ltr:text-left">{t("admin.progress.dialog.progressDetails.lastUpdate")}</TableHead>
                                              </TableRow>
                                          </TableHeader>
                                         <TableBody>
@@ -305,18 +307,18 @@ const ProgressPage = () => {
                                                                 progress.isCompleted ? (
                                                                     <Badge variant="default" className="flex items-center gap-1">
                                                                         <CheckCircle className="h-3 w-3" />
-                                                                        مكتمل
+                                                                        {t("admin.progress.dialog.progressDetails.completed")}
                                                                     </Badge>
                                                                 ) : (
                                                                     <Badge variant="secondary" className="flex items-center gap-1">
                                                                         <Clock className="h-3 w-3" />
-                                                                        قيد التقدم
+                                                                        {t("admin.progress.dialog.progressDetails.inProgress")}
                                                                     </Badge>
                                                                 )
                                                             ) : (
                                                                 <Badge variant="outline" className="flex items-center gap-1">
                                                                     <BookOpen className="h-3 w-3" />
-                                                                    لم يبدأ
+                                                                    {t("admin.progress.dialog.progressDetails.notStarted")}
                                                                 </Badge>
                                                             )}
                                                         </TableCell>

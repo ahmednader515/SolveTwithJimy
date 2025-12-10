@@ -262,12 +262,12 @@ const QuizResultsContent = () => {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="text-right">الطالب</TableHead>
-                                <TableHead className="text-right">الدرجة</TableHead>
-                                <TableHead className="text-right">النسبة المئوية</TableHead>
-                                <TableHead className="text-right">التقييم</TableHead>
-                                <TableHead className="text-right">تاريخ التقديم</TableHead>
-                                <TableHead className="text-right">الإجراءات</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">الطالب</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">الدرجة</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">النسبة المئوية</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">التقييم</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">تاريخ التقديم</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">الإجراءات</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>

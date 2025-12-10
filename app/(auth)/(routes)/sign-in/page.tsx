@@ -12,9 +12,11 @@ import { signIn } from "next-auth/react";
 import { Eye, EyeOff, ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import { getDashboardUrlByRole } from "@/lib/utils";
+import { useLanguage } from "@/lib/contexts/language-context";
 
 export default function SignInPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -36,7 +38,7 @@ export default function SignInPage() {
 
     // Client-side validation
     if (!formData.phoneNumber.trim() || !formData.password.trim()) {
-      toast.error("الرجاء إدخال رقم الهاتف وكلمة المرور");
+      toast.error(t("auth.errors.missingCredentials"));
       setIsLoading(false);
       return;
     }
@@ -59,13 +61,13 @@ export default function SignInPage() {
       if (!validationResponse.ok || validationData.error) {
         // Handle specific error messages
         const errorMessages: Record<string, string> = {
-          "MISSING_CREDENTIALS": "الرجاء إدخال رقم الهاتف وكلمة المرور",
-          "INVALID_CREDENTIALS": "رقم الهاتف أو كلمة المرور خطأ",
-          "NO_PASSWORD_SET": "هذا الحساب لا يحتوي على كلمة مرور. يرجى استخدام طريقة تسجيل دخول أخرى",
-          "SERVER_ERROR": "حدث خطأ في الخادم. يرجى المحاولة لاحقاً",
+          "MISSING_CREDENTIALS": t("auth.errors.missingCredentials"),
+          "INVALID_CREDENTIALS": t("auth.errors.invalidCredentials"),
+          "NO_PASSWORD_SET": t("auth.errors.noPasswordSet"),
+          "SERVER_ERROR": t("auth.errors.serverError"),
         };
 
-        const errorMessage = errorMessages[validationData.error] || "رقم الهاتف أو كلمة المرور خطأ";
+        const errorMessage = errorMessages[validationData.error] || t("auth.errors.invalidCredentials");
         toast.error(errorMessage);
         setIsLoading(false);
         return;
@@ -81,19 +83,19 @@ export default function SignInPage() {
       if (result?.error) {
         // Fallback error handling for NextAuth errors
         const errorMessages: Record<string, string> = {
-          "CredentialsSignin": "رقم الهاتف أو كلمة المرور خطأ",
-          "Configuration": "حدث خطأ في إعدادات النظام. يرجى المحاولة لاحقاً",
-          "AccessDenied": "ليس لديك صلاحية للدخول",
-          "Verification": "فشل التحقق من الحساب",
+          "CredentialsSignin": t("auth.errors.invalidCredentials"),
+          "Configuration": t("auth.errors.serverError"),
+          "AccessDenied": t("auth.errors.accessDenied"),
+          "Verification": t("auth.errors.verificationFailed"),
         };
 
-        const errorMessage = errorMessages[result.error] || "رقم الهاتف أو كلمة المرور خطأ";
+        const errorMessage = errorMessages[result.error] || t("auth.errors.invalidCredentials");
         toast.error(errorMessage);
         setIsLoading(false);
         return;
       }
 
-      toast.success("تم تسجيل الدخول بنجاح");
+      toast.success(t("auth.errors.signInSuccess"));
       
       // Get user data to determine role and redirect accordingly
       const response = await fetch("/api/auth/session", { cache: "no-store" });
@@ -112,14 +114,14 @@ export default function SignInPage() {
       // Handle network errors or other unexpected errors
       if (error instanceof Error) {
         if (error.message.includes("Network") || error.message.includes("fetch")) {
-          toast.error("خطأ في الاتصال بالشبكة. يرجى التحقق من اتصالك بالإنترنت");
+          toast.error(t("auth.errors.networkError"));
         } else if (error.message.includes("timeout")) {
-          toast.error("انتهت مهلة الاتصال. يرجى المحاولة مرة أخرى");
+          toast.error(t("auth.errors.timeout"));
         } else {
-          toast.error("رقم الهاتف أو كلمة المرور خطأ");
+          toast.error(t("auth.errors.invalidCredentials"));
         }
       } else {
-        toast.error("رقم الهاتف أو كلمة المرور خطأ");
+        toast.error(t("auth.errors.invalidCredentials"));
       }
     } finally {
       setIsLoading(false);
@@ -154,10 +156,10 @@ export default function SignInPage() {
             </div>
             <div className="space-y-4">
               <h3 className="text-2xl font-bold text-brand">
-                مرحباً بك مرة أخرى
+                {t("auth.welcomeBack")}
               </h3>
               <p className="text-lg text-muted-foreground max-w-md">
-                سجل دخولك واستكشف الكورسات التعليمية المميزة
+                {t("auth.welcomeMessage")}
               </p>
             </div>
           </div>
@@ -169,15 +171,15 @@ export default function SignInPage() {
         <div className="w-full max-w-md space-y-6 py-8 mt-8">
           <div className="space-y-2 text-center">
             <h2 className="text-3xl font-bold tracking-tight">
-              تسجيل الدخول
+              {t("auth.signInTitle")}
             </h2>
             <p className="text-sm text-muted-foreground">
-              أدخل رقم هاتفك وكلمة المرور للدخول إلى حسابك
+              {t("auth.signInSubtitle")}
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="phoneNumber">رقم الهاتف</Label>
+              <Label htmlFor="phoneNumber">{t("auth.phoneNumber")}</Label>
               <Input
                 id="phoneNumber"
                 name="phoneNumber"
@@ -192,7 +194,7 @@ export default function SignInPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">كلمة المرور</Label>
+              <Label htmlFor="password">{t("auth.password")}</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -201,7 +203,7 @@ export default function SignInPage() {
                   autoComplete="current-password"
                   required
                   disabled={isLoading}
-                  className="h-10"
+                  className="h-10 rtl:pr-10 ltr:pl-10"
                   value={formData.password}
                   onChange={handleInputChange}
                 />
@@ -209,7 +211,7 @@ export default function SignInPage() {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
+                  className="absolute rtl:right-0 ltr:left-0 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -224,19 +226,19 @@ export default function SignInPage() {
             <LoadingButton
               type="submit"
               loading={isLoading}
-              loadingText="جاري تسجيل الدخول..."
+              loadingText={t("auth.signInLoading")}
               className="w-full h-10 bg-brand hover:bg-brand/90 text-white"
             >
-              تسجيل الدخول
+              {t("auth.signInButton")}
             </LoadingButton>
           </form>
           <div className="text-center text-sm">
-            <span className="text-muted-foreground">ليس لديك حساب؟ </span>
+            <span className="text-muted-foreground">{t("auth.dontHaveAccount")} </span>
             <Link 
               href="/sign-up" 
               className="text-primary hover:underline transition-colors"
             >
-              إنشاء حساب جديد
+              {t("auth.createNewAccount")}
             </Link>
           </div>
         </div>

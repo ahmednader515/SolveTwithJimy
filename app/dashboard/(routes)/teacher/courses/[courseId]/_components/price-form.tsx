@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { Course } from "@prisma/client";
 import { Input } from "@/components/ui/input";
 import { formatPrice } from "@/lib/format";
+import { useLanguage } from "@/lib/contexts/language-context";
 
 interface PriceFormProps {
     initialData: Course;
@@ -36,7 +37,7 @@ export const PriceForm = ({
     initialData,
     courseId
 }: PriceFormProps) => {
-
+    const { t } = useLanguage();
     const [isEditing, setIsEditing] = useState(false);
 
     const toggleEdit = () => setIsEditing((current) => !current);
@@ -55,24 +56,24 @@ export const PriceForm = ({
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
             await axios.patch(`/api/courses/${courseId}`, values);
-            toast.success("تم تحديث الكورس");
+            toast.success(t("teacher.courseEdit.forms.updateSuccess"));
             toggleEdit();
             router.refresh();
         } catch {
-            toast.error("حدث خطأ");
+            toast.error(t("teacher.courseEdit.forms.updateError"));
         }
     }
 
     return (
         <div className="mt-6 border bg-card rounded-md p-4">
             <div className="font-medium flex items-center justify-between">
-                سعر الكورس
+                {t("teacher.courseEdit.forms.coursePrice")}
                 <Button onClick={toggleEdit} variant="ghost">
-                    {isEditing && (<>إلغاء</>)}
+                    {isEditing && (<>{t("common.cancel")}</>)}
                     {!isEditing && (
                     <>
                         <Pencil className="h-4 w-4 mr-2" />
-                        تعديل السعر
+                        {t("teacher.courseEdit.forms.editPrice")}
                     </>)}
                 </Button>
             </div>
@@ -82,10 +83,10 @@ export const PriceForm = ({
                     !initialData.price && initialData.price !== 0 && "text-muted-foreground italic"
                 )}>
                     {initialData.price === 0
-                      ? "مجاني"
+                      ? t("common.free")
                       : initialData.price
                       ? formatPrice(initialData.price)
-                      : "لا يوجد سعر"
+                      : t("teacher.courseEdit.forms.noPrice")
                     }
                 </p>
             )}

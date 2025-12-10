@@ -14,6 +14,7 @@ import { usePathname } from "next/navigation";
 import { useNavigationRouter } from "@/lib/hooks/use-navigation-router";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { UploadDropzone } from "@/lib/uploadthing";
+import { useLanguage } from "@/lib/contexts/language-context";
 
 interface Course {
     id: string;
@@ -62,6 +63,7 @@ interface CourseItem {
 }
 
 const CreateQuizPage = () => {
+    const { t } = useLanguage();
     const router = useNavigationRouter();
     const pathname = usePathname();
     const dashboardPath = pathname.includes("/dashboard/admin/")
@@ -156,7 +158,7 @@ const CreateQuizPage = () => {
                 ...items,
                 {
                     id: "new-quiz",
-                    title: quizTitle || "اختبار جديد",
+                    title: quizTitle || t("teacher.quizzes.create.newQuiz"),
                     type: "quiz" as const,
                     position: items.length + 1,
                     isPublished: false
@@ -204,7 +206,7 @@ const CreateQuizPage = () => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
         if (!SpeechRecognition) {
-            toast.error("المتصفح لا يدعم الإملاء الصوتي");
+            toast.error(t("teacher.quizzes.create.errors.speechNotSupported"));
             return;
         }
 
@@ -245,7 +247,7 @@ const CreateQuizPage = () => {
 
             recognition.onerror = (event: any) => {
                 console.error("[SPEECH_RECOGNITION_ERROR]", event.error);
-                toast.error("تعذر التعرف على الصوت");
+                toast.error(t("teacher.quizzes.create.errors.speechRecognitionError"));
             };
 
             recognition.onend = () => {
@@ -257,7 +259,7 @@ const CreateQuizPage = () => {
             recognition.start();
         } catch (error) {
             console.error("[SPEECH_RECOGNITION]", error);
-            toast.error("تعذر بدء التسجيل الصوتي");
+            toast.error(t("teacher.quizzes.create.errors.speechStartError"));
             stopListening();
         }
     };
@@ -265,7 +267,7 @@ const CreateQuizPage = () => {
     const handleCreateQuiz = async () => {
         stopListening();
         if (!selectedCourse || !quizTitle.trim()) {
-            toast.error("يرجى إدخال جميع البيانات المطلوبة");
+            toast.error(t("teacher.quizzes.create.errors.requiredFields"));
             return;
         }
 
@@ -277,7 +279,7 @@ const CreateQuizPage = () => {
             
             // Validate question text
             if (!question.text || question.text.trim() === "") {
-                validationErrors.push(`السؤال ${i + 1}: نص السؤال مطلوب`);
+                validationErrors.push(t("teacher.quizzes.create.errors.questionTextRequired", { number: i + 1 }));
                 continue;
             }
 
@@ -285,30 +287,30 @@ const CreateQuizPage = () => {
             if (question.type === "MULTIPLE_CHOICE") {
                 const validOptions = question.options?.filter(option => option.trim() !== "") || [];
                 if (validOptions.length === 0) {
-                    validationErrors.push(`السؤال ${i + 1}: يجب إضافة خيار واحد على الأقل`);
+                    validationErrors.push(t("teacher.quizzes.create.errors.questionOptionsRequired", { number: i + 1 }));
                     continue;
                 }
                 
                 // Check if correct answer index is valid
                 if (typeof question.correctAnswer !== 'number' || question.correctAnswer < 0 || question.correctAnswer >= validOptions.length) {
-                    validationErrors.push(`السؤال ${i + 1}: يجب اختيار إجابة صحيحة`);
+                    validationErrors.push(t("teacher.quizzes.create.errors.questionCorrectAnswerRequired", { number: i + 1 }));
                     continue;
                 }
             } else if (question.type === "TRUE_FALSE") {
                 if (!question.correctAnswer || (question.correctAnswer !== "true" && question.correctAnswer !== "false")) {
-                    validationErrors.push(`السؤال ${i + 1}: يجب اختيار إجابة صحيحة`);
+                    validationErrors.push(t("teacher.quizzes.create.errors.questionCorrectAnswerRequired", { number: i + 1 }));
                     continue;
                 }
             } else if (question.type === "SHORT_ANSWER") {
                 if (!question.correctAnswer || question.correctAnswer.toString().trim() === "") {
-                    validationErrors.push(`السؤال ${i + 1}: الإجابة الصحيحة مطلوبة`);
+                    validationErrors.push(t("teacher.quizzes.create.errors.questionCorrectAnswerTextRequired", { number: i + 1 }));
                     continue;
                 }
             }
 
             // Check if points are valid
             if (question.points <= 0) {
-                validationErrors.push(`السؤال ${i + 1}: الدرجات يجب أن تكون أكبر من صفر`);
+                validationErrors.push(t("teacher.quizzes.create.errors.questionPointsRequired", { number: i + 1 }));
                 continue;
             }
         }
@@ -320,7 +322,7 @@ const CreateQuizPage = () => {
 
         // Additional validation: ensure no questions are empty
         if (questions.length === 0) {
-            toast.error("يجب إضافة سؤال واحد على الأقل");
+            toast.error(t("teacher.quizzes.create.errors.atLeastOneQuestion"));
             return;
         }
 
@@ -356,15 +358,15 @@ const CreateQuizPage = () => {
             });
 
             if (response.ok) {
-                toast.success("تم إنشاء الاختبار بنجاح");
+                toast.success(t("teacher.quizzes.create.errors.createSuccess"));
                 router.push(dashboardPath);
             } else {
                 const error = await response.json();
-                toast.error(error.message || "حدث خطأ أثناء إنشاء الاختبار");
+                toast.error(error.message || t("teacher.quizzes.create.errors.createError"));
             }
         } catch (error) {
             console.error("Error creating quiz:", error);
-            toast.error("حدث خطأ أثناء إنشاء الاختبار");
+            toast.error(t("teacher.quizzes.create.errors.createError"));
         } finally {
             setIsCreatingQuiz(false);
         }
@@ -420,17 +422,17 @@ const CreateQuizPage = () => {
         <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    إنشاء اختبار جديد
+                    {t("teacher.quizzes.create.title")}
                 </h1>
                 <Button variant="outline" onClick={() => router.push(dashboardPath)}>
-                    العودة إلى الاختبارات
+                    {t("teacher.quizzes.create.backToQuizzes")}
                 </Button>
             </div>
 
             <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label>اختر الكورس</Label>
+                        <Label>{t("teacher.quizzes.create.selectCourse")}</Label>
                         <Select value={selectedCourse} onValueChange={(value) => {
                             setSelectedCourse(value);
                             // Clear previous data immediately
@@ -441,7 +443,7 @@ const CreateQuizPage = () => {
                             }
                         }}>
                             <SelectTrigger>
-                                <SelectValue placeholder="اختر كورس..." />
+                                <SelectValue placeholder={t("teacher.quizzes.create.selectCoursePlaceholder")} />
                             </SelectTrigger>
                             <SelectContent>
                                 {courses.map((course) => (
@@ -453,7 +455,7 @@ const CreateQuizPage = () => {
                         </Select>
                     </div>
                     <div className="space-y-2">
-                        <Label>عنوان الاختبار</Label>
+                        <Label>{t("teacher.quizzes.create.quizTitle")}</Label>
                         <Input
                             value={quizTitle}
                             onChange={(e) => {
@@ -462,12 +464,12 @@ const CreateQuizPage = () => {
                                 setCourseItems(prev => 
                                     prev.map(item => 
                                         item.id === "new-quiz" 
-                                            ? { ...item, title: e.target.value || "اختبار جديد" }
+                                            ? { ...item, title: e.target.value || t("teacher.quizzes.create.newQuiz") }
                                             : item
                                     )
                                 );
                             }}
-                            placeholder="أدخل عنوان الاختبار"
+                            placeholder={t("teacher.quizzes.create.quizTitlePlaceholder")}
                         />
                     </div>
                 </div>
@@ -475,18 +477,18 @@ const CreateQuizPage = () => {
                 {selectedCourse && (
                     <Card>
                         <CardHeader>
-                            <CardTitle>ترتيب الاختبار في الكورس</CardTitle>
+                            <CardTitle>{t("teacher.quizzes.create.position.title")}</CardTitle>
                             <p className="text-sm text-muted-foreground">
-                                اسحب الاختبار الجديد إلى الموقع المطلوب بين الفصول والاختبارات الموجودة
+                                {t("teacher.quizzes.create.position.description")}
                             </p>
                             <p className="text-sm text-blue-600">
-                                الموقع المحدد: {selectedPosition}
+                                {t("teacher.quizzes.create.position.selectedPosition", { position: selectedPosition })}
                             </p>
                         </CardHeader>
                         <CardContent>
                             {isLoadingCourseItems ? (
                                 <div className="text-center py-8">
-                                    <div className="text-muted-foreground">جاري تحميل محتوى الكورس...</div>
+                                    <div className="text-muted-foreground">{t("teacher.quizzes.create.position.loading")}</div>
                                 </div>
                             ) : courseItems.length > 0 ? (
                                 <DragDropContext onDragEnd={handleDragEnd}>
@@ -516,12 +518,12 @@ const CreateQuizPage = () => {
                                                                             {item.title}
                                                                         </div>
                                                                         <div className={`text-sm ${item.id === "new-quiz" ? "text-blue-600" : "text-muted-foreground"}`}>
-                                                                            {item.type === "chapter" ? "فصل" : "اختبار"}
+                                                                            {item.type === "chapter" ? t("teacher.quizzes.create.position.chapter") : t("teacher.quizzes.create.position.quiz")}
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                                 <Badge variant={item.id === "new-quiz" ? "outline" : (item.isPublished ? "default" : "secondary")} className={item.id === "new-quiz" ? "border-blue-300 text-blue-700" : ""}>
-                                                                    {item.id === "new-quiz" ? "جديد" : (item.isPublished ? "منشور" : "مسودة")}
+                                                                    {item.id === "new-quiz" ? t("teacher.quizzes.create.position.new") : (item.isPublished ? t("teacher.quizzes.status.published") : t("teacher.quizzes.status.draft"))}
                                                                 </Badge>
                                                             </div>
                                                         )}
@@ -536,18 +538,18 @@ const CreateQuizPage = () => {
                             ) : (
                                 <div className="text-center py-8">
                                     <p className="text-muted-foreground mb-4">
-                                        لا توجد فصول أو اختبارات في هذه الكورس. سيتم إضافة الاختبار في الموقع الأول.
+                                        {t("teacher.quizzes.create.position.empty")}
                                     </p>
                                     <div className="p-3 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50">
                                         <div className="flex items-center justify-center space-x-3">
                                             <div>
                                                 <div className="font-medium text-blue-800">
-                                                    {quizTitle || "اختبار جديد"}
+                                                    {quizTitle || t("teacher.quizzes.create.newQuiz")}
                                                 </div>
-                                                <div className="text-sm text-blue-600">اختبار</div>
+                                                <div className="text-sm text-blue-600">{t("teacher.quizzes.create.position.quiz")}</div>
                                             </div>
                                             <Badge variant="outline" className="border-blue-300 text-blue-700">
-                                                جديد
+                                                {t("teacher.quizzes.create.position.new")}
                                             </Badge>
                                         </div>
                                     </div>
@@ -558,31 +560,31 @@ const CreateQuizPage = () => {
                 )}
 
                 <div className="space-y-2">
-                    <Label>وصف الاختبار</Label>
+                    <Label>{t("teacher.quizzes.create.description")}</Label>
                     <Textarea
                         value={quizDescription}
                         onChange={(e) => setQuizDescription(e.target.value)}
-                        placeholder="أدخل وصف الاختبار"
+                        placeholder={t("teacher.quizzes.create.descriptionPlaceholder")}
                         rows={3}
                     />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label>مدة الاختبار (بالدقائق)</Label>
+                        <Label>{t("teacher.quizzes.create.timer.label")}</Label>
                         <Input
                             type="number"
                             value={quizTimer || ""}
                             onChange={(e) => setQuizTimer(e.target.value ? parseInt(e.target.value) : null)}
-                            placeholder="اترك فارغاً لعدم تحديد مدة"
+                            placeholder={t("teacher.quizzes.create.timer.placeholder")}
                             min="1"
                         />
                         <p className="text-sm text-muted-foreground">
-                            اترك الحقل فارغاً إذا كنت لا تريد تحديد مدة للاختبار
+                            {t("teacher.quizzes.create.timer.hint")}
                         </p>
                     </div>
                     <div className="space-y-2">
-                        <Label>عدد المحاولات المسموحة</Label>
+                        <Label>{t("teacher.quizzes.create.maxAttempts.label")}</Label>
                         <Input
                             type="number"
                             value={quizMaxAttempts}
@@ -591,17 +593,17 @@ const CreateQuizPage = () => {
                             max="10"
                         />
                         <p className="text-sm text-muted-foreground">
-                            عدد المرات التي يمكن للطالب إعادة الاختبار
+                            {t("teacher.quizzes.create.maxAttempts.hint")}
                         </p>
                     </div>
                 </div>
 
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <Label>الأسئلة</Label>
+                        <Label>{t("teacher.quizzes.create.questions.label")}</Label>
                         <Button type="button" variant="outline" onClick={addQuestion}>
                             <Plus className="h-4 w-4 mr-2" />
-                            إضافة سؤال
+                            {t("teacher.quizzes.create.questions.addQuestion")}
                         </Button>
                     </div>
 
@@ -610,12 +612,12 @@ const CreateQuizPage = () => {
                             <CardHeader>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <CardTitle className="text-lg">السؤال {index + 1}</CardTitle>
+                                        <CardTitle className="text-lg">{t("teacher.quizzes.create.questions.questionNumber", { number: index + 1 })}</CardTitle>
                                         {(!question.text.trim() || !question.correctAnswer.toString().trim() || 
                                           (question.type === "MULTIPLE_CHOICE" && 
                                            (!question.options || question.options.filter(opt => opt.trim() !== "").length < 2))) && (
                                             <Badge variant="destructive" className="text-xs">
-                                                غير مكتمل
+                                                {t("teacher.quizzes.create.questions.incomplete")}
                                             </Badge>
                                         )}
                                     </div>
@@ -632,11 +634,11 @@ const CreateQuizPage = () => {
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
-                                        <Label>نص السؤال</Label>
+                                        <Label>{t("teacher.quizzes.create.questions.questionText")}</Label>
                                         <div className="flex items-center gap-2">
                                             {listeningQuestionId === question.id && (
                                                 <span className="text-xs text-blue-600">
-                                                    جاري الاستماع...
+                                                    {t("teacher.quizzes.create.questions.listening")}
                                                 </span>
                                             )}
                                             <Button
@@ -649,7 +651,7 @@ const CreateQuizPage = () => {
                                             >
                                                 <Mic className="h-4 w-4" />
                                                 <span className="sr-only">
-                                                    {listeningQuestionId === question.id ? "إيقاف التسجيل الصوتي" : "بدء التسجيل الصوتي"}
+                                                    {listeningQuestionId === question.id ? t("teacher.quizzes.create.questions.stopRecording") : t("teacher.quizzes.create.questions.startRecording")}
                                                 </span>
                                             </Button>
                                         </div>
@@ -657,12 +659,12 @@ const CreateQuizPage = () => {
                                     <Textarea
                                         value={question.text}
                                         onChange={(e) => updateQuestion(index, "text", e.target.value)}
-                                        placeholder="أدخل نص السؤال"
+                                        placeholder={t("teacher.quizzes.create.questions.questionTextPlaceholder")}
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label>صورة السؤال (اختياري)</Label>
+                                    <Label>{t("teacher.quizzes.create.questions.questionImage")}</Label>
                                     <div className="space-y-2">
                                         {question.imageUrl ? (
                                             <div className="relative">
@@ -688,12 +690,12 @@ const CreateQuizPage = () => {
                                                     onClientUploadComplete={(res) => {
                                                         if (res && res[0]) {
                                                             updateQuestion(index, "imageUrl", res[0].url);
-                                                            toast.success("تم رفع الصورة بنجاح");
+                                                            toast.success(t("teacher.quizzes.create.questions.imageUploadSuccess"));
                                                         }
                                                         setUploadingImages(prev => ({ ...prev, [index]: false }));
                                                     }}
                                                     onUploadError={(error: Error) => {
-                                                        toast.error(`حدث خطأ أثناء رفع الصورة: ${error.message}`);
+                                                        toast.error(t("teacher.quizzes.create.questions.imageUploadError", { error: error.message }));
                                                         setUploadingImages(prev => ({ ...prev, [index]: false }));
                                                     }}
                                                     onUploadBegin={() => {
@@ -707,7 +709,7 @@ const CreateQuizPage = () => {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label>نوع السؤال</Label>
+                                        <Label>{t("teacher.quizzes.create.questions.questionType")}</Label>
                                         <Select
                                             value={question.type}
                                             onValueChange={(value: "MULTIPLE_CHOICE" | "TRUE_FALSE" | "SHORT_ANSWER") =>
@@ -718,14 +720,14 @@ const CreateQuizPage = () => {
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="MULTIPLE_CHOICE">اختيار من متعدد</SelectItem>
-                                                <SelectItem value="TRUE_FALSE">صح أو خطأ</SelectItem>
-                                                <SelectItem value="SHORT_ANSWER">إجابة قصيرة</SelectItem>
+                                                <SelectItem value="MULTIPLE_CHOICE">{t("teacher.quizzes.create.questions.multipleChoice")}</SelectItem>
+                                                <SelectItem value="TRUE_FALSE">{t("teacher.quizzes.create.questions.trueFalse")}</SelectItem>
+                                                <SelectItem value="SHORT_ANSWER">{t("teacher.quizzes.create.questions.shortAnswer")}</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>الدرجات</Label>
+                                        <Label>{t("teacher.quizzes.create.questions.points")}</Label>
                                         <Input
                                             type="number"
                                             value={question.points}
@@ -737,7 +739,7 @@ const CreateQuizPage = () => {
 
                                 {question.type === "MULTIPLE_CHOICE" && (
                                     <div className="space-y-2">
-                                        <Label>الخيارات</Label>
+                                        <Label>{t("teacher.quizzes.create.questions.options")}</Label>
                                         {(question.options || ["", "", "", ""]).map((option, optionIndex) => (
                                             <div key={`${question.id}-option-${optionIndex}`} className="flex items-center space-x-2">
                                                 <Input
@@ -747,7 +749,7 @@ const CreateQuizPage = () => {
                                                         newOptions[optionIndex] = e.target.value;
                                                         updateQuestion(index, "options", newOptions);
                                                     }}
-                                                    placeholder={`الخيار ${optionIndex + 1}`}
+                                                    placeholder={t("teacher.quizzes.create.questions.optionPlaceholder", { number: optionIndex + 1 })}
                                                 />
                                                 <input
                                                     type="radio"
@@ -762,17 +764,17 @@ const CreateQuizPage = () => {
 
                                 {question.type === "TRUE_FALSE" && (
                                     <div className="space-y-2">
-                                        <Label>الإجابة الصحيحة</Label>
+                                        <Label>{t("teacher.quizzes.create.questions.correctAnswer")}</Label>
                                         <Select
                                             value={typeof question.correctAnswer === 'string' ? question.correctAnswer : ''}
                                             onValueChange={(value) => updateQuestion(index, "correctAnswer", value)}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder="اختر الإجابة الصحيحة" />
+                                                <SelectValue placeholder={t("teacher.quizzes.create.questions.selectCorrectAnswer")} />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="true">صح</SelectItem>
-                                                <SelectItem value="false">خطأ</SelectItem>
+                                                <SelectItem value="true">{t("teacher.quizzes.create.questions.true")}</SelectItem>
+                                                <SelectItem value="false">{t("teacher.quizzes.create.questions.false")}</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -780,11 +782,11 @@ const CreateQuizPage = () => {
 
                                 {question.type === "SHORT_ANSWER" && (
                                     <div className="space-y-2">
-                                        <Label>الإجابة الصحيحة</Label>
+                                        <Label>{t("teacher.quizzes.create.questions.correctAnswer")}</Label>
                                         <Input
                                             value={typeof question.correctAnswer === 'string' ? question.correctAnswer : ''}
                                             onChange={(e) => updateQuestion(index, "correctAnswer", e.target.value)}
-                                            placeholder="أدخل الإجابة الصحيحة"
+                                            placeholder={t("teacher.quizzes.create.questions.correctAnswerPlaceholder")}
                                         />
                                     </div>
                                 )}
@@ -798,13 +800,13 @@ const CreateQuizPage = () => {
                         variant="outline"
                         onClick={() => router.push(dashboardPath)}
                     >
-                        إلغاء
+                        {t("teacher.quizzes.create.cancel")}
                     </Button>
                     <Button
                         onClick={handleCreateQuiz}
                         disabled={isCreatingQuiz || questions.length === 0}
                     >
-                        {isCreatingQuiz ? "جاري الحفظ..." : "إنشاء الاختبار"}
+                        {isCreatingQuiz ? t("teacher.quizzes.create.creating") : t("teacher.quizzes.create.createQuiz")}
                     </Button>
                 </div>
             </div>

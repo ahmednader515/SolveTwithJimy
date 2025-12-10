@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { Eye, Edit, Search, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/lib/contexts/language-context";
 
 interface User {
     id: string;
@@ -19,6 +20,7 @@ interface User {
 }
 
 const PasswordsPage = () => {
+    const { t } = useLanguage();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -47,7 +49,7 @@ const PasswordsPage = () => {
 
     const handlePasswordChange = async () => {
         if (!selectedUser || !newPassword) {
-            toast.error("يرجى إدخال كلمة مرور جديدة");
+            toast.error(t("admin.passwords.errors.enterPassword"));
             return;
         }
 
@@ -61,16 +63,16 @@ const PasswordsPage = () => {
             });
 
             if (response.ok) {
-                toast.success("تم تغيير كلمة المرور بنجاح");
+                toast.success(t("admin.passwords.errors.changeSuccess"));
                 setNewPassword("");
                 setIsDialogOpen(false);
                 setSelectedUser(null);
             } else {
-                toast.error("حدث خطأ أثناء تغيير كلمة المرور");
+                toast.error(t("admin.passwords.errors.changeError"));
             }
         } catch (error) {
             console.error("Error changing password:", error);
-            toast.error("حدث خطأ أثناء تغيير كلمة المرور");
+            toast.error(t("admin.passwords.errors.changeError"));
         }
     };
 
@@ -85,7 +87,7 @@ const PasswordsPage = () => {
     if (loading) {
         return (
             <div className="p-6">
-                <div className="text-center">جاري التحميل...</div>
+                <div className="text-center">{t("common.loading")}</div>
             </div>
         );
     }
@@ -94,7 +96,7 @@ const PasswordsPage = () => {
         <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    إدارة كلمات المرور
+                    {t("admin.passwords.title")}
                 </h1>
             </div>
 
@@ -102,11 +104,11 @@ const PasswordsPage = () => {
             {staffUsers.length > 0 && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>المشرفين والمعلمين</CardTitle>
+                        <CardTitle>{t("admin.passwords.staffTitle")}</CardTitle>
                         <div className="flex items-center space-x-2">
                             <Search className="h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="البحث بالاسم أو رقم الهاتف..."
+                                placeholder={t("admin.passwords.searchPlaceholder")}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="max-w-sm"
@@ -117,10 +119,10 @@ const PasswordsPage = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="text-right">الاسم</TableHead>
-                                    <TableHead className="text-right">رقم الهاتف</TableHead>
-                                    <TableHead className="text-right">الدور</TableHead>
-                                    <TableHead className="text-right">الإجراءات</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("admin.passwords.table.name")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("admin.passwords.table.phoneNumber")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("admin.passwords.table.role")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("admin.passwords.table.actions")}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -139,8 +141,8 @@ const PasswordsPage = () => {
                                                     ""
                                                 }
                                             >
-                                                {user.role === "TEACHER" ? "معلم" : 
-                                                 user.role === "ADMIN" ? "مشرف" : user.role}
+                                                {user.role === "TEACHER" ? t("teacher.users.roles.teacher") : 
+                                                 user.role === "ADMIN" ? t("teacher.users.roles.admin") : user.role}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
@@ -153,7 +155,7 @@ const PasswordsPage = () => {
                                                 }}
                                             >
                                                 <Edit className="h-4 w-4" />
-                                                تغيير كلمة المرور
+                                                {t("admin.passwords.change.button")}
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -168,11 +170,11 @@ const PasswordsPage = () => {
             {studentUsers.length > 0 && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>قائمة الطلاب</CardTitle>
+                        <CardTitle>{t("admin.passwords.studentsTitle")}</CardTitle>
                         <div className="flex items-center space-x-2">
                             <Search className="h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="البحث بالاسم أو رقم الهاتف..."
+                                placeholder={t("admin.passwords.searchPlaceholder")}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="max-w-sm"
@@ -183,10 +185,10 @@ const PasswordsPage = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="text-right">الاسم</TableHead>
-                                    <TableHead className="text-right">رقم الهاتف</TableHead>
-                                    <TableHead className="text-right">الدور</TableHead>
-                                    <TableHead className="text-right">الإجراءات</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("admin.passwords.table.name")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("admin.passwords.table.phoneNumber")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("admin.passwords.table.role")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("admin.passwords.table.actions")}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -198,7 +200,7 @@ const PasswordsPage = () => {
                                         <TableCell>{user.phoneNumber}</TableCell>
                                         <TableCell>
                                             <Badge variant="secondary">
-                                                طالب
+                                                {t("teacher.users.roles.student")}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
@@ -211,7 +213,7 @@ const PasswordsPage = () => {
                                                 }}
                                             >
                                                 <Edit className="h-4 w-4" />
-                                                تغيير كلمة المرور
+                                                {t("admin.passwords.change.button")}
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -236,25 +238,26 @@ const PasswordsPage = () => {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>
-                            تغيير كلمة مرور {selectedUser?.fullName}
+                            {t("admin.passwords.change.title", { name: selectedUser?.fullName || "" })}
                         </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="newPassword">كلمة المرور الجديدة</Label>
+                            <Label htmlFor="newPassword">{t("admin.passwords.change.newPassword")}</Label>
                             <div className="relative">
                                 <Input
                                     id="newPassword"
                                     type={showPassword ? "text" : "password"}
                                     value={newPassword}
                                     onChange={(e) => setNewPassword(e.target.value)}
-                                    placeholder="أدخل كلمة المرور الجديدة"
+                                    placeholder={t("admin.passwords.change.placeholder")}
+                                    className="rtl:pr-10 ltr:pl-10"
                                 />
                                 <Button
                                     type="button"
                                     variant="ghost"
-                                    size="sm"
-                                    className="absolute left-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                    size="icon"
+                                    className="absolute top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent rtl:right-0 ltr:left-0"
                                     onClick={() => setShowPassword(!showPassword)}
                                 >
                                     {showPassword ? (
@@ -274,10 +277,10 @@ const PasswordsPage = () => {
                                     setSelectedUser(null);
                                 }}
                             >
-                                إلغاء
+                                {t("common.cancel")}
                             </Button>
                             <Button onClick={handlePasswordChange}>
-                                تغيير كلمة المرور
+                                {t("admin.passwords.change.button")}
                             </Button>
                         </div>
                     </div>

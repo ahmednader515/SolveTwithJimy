@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Search, Eye, Award, TrendingUp, Users, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
+import { useLanguage } from "@/lib/contexts/language-context";
 
 interface Course {
     id: string;
@@ -65,6 +66,7 @@ interface QuizAnswer {
 }
 
 const GradesPage = () => {
+    const { t } = useLanguage();
     const [courses, setCourses] = useState<Course[]>([]);
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
@@ -155,7 +157,7 @@ const GradesPage = () => {
     if (loading) {
         return (
             <div className="p-6">
-                <div className="text-center">جاري التحميل...</div>
+                <div className="text-center">{t("teacher.grades.loading")}</div>
             </div>
         );
     }
@@ -164,7 +166,7 @@ const GradesPage = () => {
         <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    درجات الطلاب
+                    {t("teacher.grades.title")}
                 </h1>
             </div>
 
@@ -175,7 +177,7 @@ const GradesPage = () => {
                         <div className="flex items-center space-x-2">
                             <Users className="h-8 w-8 text-blue-600" />
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">إجمالي الطلاب</p>
+                                <p className="text-sm font-medium text-muted-foreground">{t("teacher.grades.summary.totalStudents")}</p>
                                 <p className="text-2xl font-bold">
                                     {new Set(quizResults.map(r => r.studentId)).size}
                                 </p>
@@ -188,7 +190,7 @@ const GradesPage = () => {
                         <div className="flex items-center space-x-2">
                             <Award className="h-8 w-8 text-green-600" />
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">متوسط الدرجات</p>
+                                <p className="text-sm font-medium text-muted-foreground">{t("teacher.grades.summary.averageScore")}</p>
                                 <p className="text-2xl font-bold">
                                     {quizResults.length > 0 
                                         ? Math.round(quizResults.reduce((sum, r) => sum + r.percentage, 0) / quizResults.length)
@@ -203,7 +205,7 @@ const GradesPage = () => {
                         <div className="flex items-center space-x-2">
                             <TrendingUp className="h-8 w-8 text-purple-600" />
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">أعلى درجة</p>
+                                <p className="text-sm font-medium text-muted-foreground">{t("teacher.grades.summary.highestScore")}</p>
                                 <p className="text-2xl font-bold">
                                     {quizResults.length > 0 
                                         ? Math.max(...quizResults.map(r => r.percentage))
@@ -218,7 +220,7 @@ const GradesPage = () => {
                         <div className="flex items-center space-x-2">
                             <FileText className="h-8 w-8 text-orange-600" />
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">إجمالي الاختبارات</p>
+                                <p className="text-sm font-medium text-muted-foreground">{t("teacher.grades.summary.totalQuizzes")}</p>
                                 <p className="text-2xl font-bold">{quizResults.length}</p>
                             </div>
                         </div>
@@ -229,29 +231,29 @@ const GradesPage = () => {
             {/* Filters */}
             <Card>
                 <CardHeader>
-                    <CardTitle>فلاتر البحث</CardTitle>
+                    <CardTitle>{t("teacher.grades.filters.title")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">البحث</label>
+                            <label className="text-sm font-medium">{t("teacher.grades.filters.search")}</label>
                             <div className="flex items-center space-x-2">
                                 <Search className="h-4 w-4 text-muted-foreground" />
                                 <Input
-                                    placeholder="البحث بالطالب أو الاختبار..."
+                                    placeholder={t("teacher.grades.filters.searchPlaceholder")}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">الكورس</label>
+                            <label className="text-sm font-medium">{t("teacher.grades.filters.course")}</label>
                             <Select value={selectedCourse} onValueChange={setSelectedCourse}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="جميع الكورسات" />
+                                    <SelectValue placeholder={t("teacher.grades.filters.allCourses")} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">جميع الكورسات</SelectItem>
+                                    <SelectItem value="all">{t("teacher.grades.filters.allCourses")}</SelectItem>
                                     {courses.map((course) => (
                                         <SelectItem key={course.id} value={course.id}>
                                             {course.title}
@@ -261,13 +263,13 @@ const GradesPage = () => {
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">الاختبار</label>
+                            <label className="text-sm font-medium">{t("teacher.grades.filters.quiz")}</label>
                             <Select value={selectedQuiz} onValueChange={setSelectedQuiz}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="جميع الاختبارات" />
+                                    <SelectValue placeholder={t("teacher.grades.filters.allQuizzes")} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">جميع الاختبارات</SelectItem>
+                                    <SelectItem value="all">{t("teacher.grades.filters.allQuizzes")}</SelectItem>
                                     {quizzes.map((quiz) => (
                                         <SelectItem key={quiz.id} value={quiz.id}>
                                             {quiz.title}
@@ -283,19 +285,19 @@ const GradesPage = () => {
             {/* Results Table */}
             <Card>
                 <CardHeader>
-                    <CardTitle>نتائج الاختبارات</CardTitle>
+                    <CardTitle>{t("teacher.grades.table.title")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="text-right">الطالب</TableHead>
-                                <TableHead className="text-right">الاختبار</TableHead>
-                                <TableHead className="text-right">الكورس</TableHead>
-                                <TableHead className="text-right">الدرجة</TableHead>
-                                <TableHead className="text-right">النسبة المئوية</TableHead>
-                                <TableHead className="text-right">تاريخ التقديم</TableHead>
-                                <TableHead className="text-right">الإجراءات</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.student")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.quiz")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.course")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.score")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.percentage")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.submittedAt")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.grades.table.actions")}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -334,7 +336,7 @@ const GradesPage = () => {
                                                 onClick={() => handleViewResult(result)}
                                             >
                                                 <Eye className="h-4 w-4" />
-                                                عرض التفاصيل
+                                                {t("teacher.grades.table.viewDetails")}
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -350,7 +352,7 @@ const GradesPage = () => {
                 <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>
-                            تفاصيل نتيجة {selectedResult?.user.fullName}
+                            {t("teacher.grades.details.title", { name: selectedResult?.user.fullName || "" })}
                         </DialogTitle>
                     </DialogHeader>
                     {selectedResult && (
@@ -358,7 +360,7 @@ const GradesPage = () => {
                             {/* Summary */}
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>ملخص النتيجة</CardTitle>
+                                    <CardTitle>{t("teacher.grades.details.summary.title")}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -366,30 +368,30 @@ const GradesPage = () => {
                                             <div className="text-2xl font-bold text-blue-600">
                                                 {selectedResult.score}/{selectedResult.totalPoints}
                                             </div>
-                                            <div className="text-sm text-muted-foreground">الدرجة</div>
+                                            <div className="text-sm text-muted-foreground">{t("teacher.grades.details.summary.score")}</div>
                                         </div>
                                         <div className="text-center">
                                             <div className={`text-2xl font-bold ${getGradeColor(selectedResult.percentage)}`}>
                                                 {selectedResult.percentage}%
                                             </div>
-                                            <div className="text-sm text-muted-foreground">النسبة المئوية</div>
+                                            <div className="text-sm text-muted-foreground">{t("teacher.grades.details.summary.percentage")}</div>
                                         </div>
                                         <div className="text-center">
                                             <div className="text-2xl font-bold text-green-600">
                                                 {selectedResult.answers.filter(a => a.isCorrect).length}
                                             </div>
-                                            <div className="text-sm text-muted-foreground">إجابات صحيحة</div>
+                                            <div className="text-sm text-muted-foreground">{t("teacher.grades.details.summary.correctAnswers")}</div>
                                         </div>
                                         <div className="text-center">
                                             <div className="text-2xl font-bold text-red-600">
                                                 {selectedResult.answers.filter(a => !a.isCorrect).length}
                                             </div>
-                                            <div className="text-sm text-muted-foreground">إجابات خاطئة</div>
+                                            <div className="text-sm text-muted-foreground">{t("teacher.grades.details.summary.wrongAnswers")}</div>
                                         </div>
                                     </div>
                                     <div className="mt-4">
                                         <div className="flex items-center justify-between mb-2">
-                                            <span className="text-sm font-medium">التقدم العام</span>
+                                            <span className="text-sm font-medium">{t("teacher.grades.details.summary.overallProgress")}</span>
                                             <span className="text-sm font-medium">{selectedResult.percentage}%</span>
                                         </div>
                                         <Progress value={selectedResult.percentage} className="w-full" />
@@ -400,31 +402,31 @@ const GradesPage = () => {
                             {/* Detailed Answers */}
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>تفاصيل الإجابات</CardTitle>
+                                    <CardTitle>{t("teacher.grades.details.answers.title")}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
                                         {selectedResult.answers.map((answer, index) => (
                                             <div key={answer.questionId} className="border rounded-lg p-4">
                                                 <div className="flex items-center justify-between mb-2">
-                                                    <h4 className="font-medium">السؤال {index + 1}</h4>
+                                                    <h4 className="font-medium">{t("teacher.grades.details.answers.questionNumber", { number: index + 1 })}</h4>
                                                     <Badge variant={answer.isCorrect ? "default" : "destructive"}>
-                                                        {answer.isCorrect ? "صحيح" : "خاطئ"}
+                                                        {answer.isCorrect ? t("teacher.grades.details.answers.correct") : t("teacher.grades.details.answers.wrong")}
                                                     </Badge>
                                                 </div>
                                                 <p className="text-sm text-muted-foreground mb-2">{answer.question.text}</p>
                                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                                     <div>
-                                                        <span className="font-medium">إجابة الطالب:</span>
+                                                        <span className="font-medium">{t("teacher.grades.details.answers.studentAnswer")}</span>
                                                         <p className="text-muted-foreground">{answer.studentAnswer}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="font-medium">الإجابة الصحيحة:</span>
+                                                        <span className="font-medium">{t("teacher.grades.details.answers.correctAnswer")}</span>
                                                         <p className="text-green-600">{answer.correctAnswer}</p>
                                                     </div>
                                                 </div>
                                                 <div className="mt-2 text-sm">
-                                                    <span className="font-medium">الدرجات:</span>
+                                                    <span className="font-medium">{t("teacher.grades.details.answers.points")}</span>
                                                     <span className="text-muted-foreground">
                                                         {" "}{answer.pointsEarned}/{answer.question.points}
                                                     </span>

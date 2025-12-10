@@ -9,10 +9,11 @@ const CreatePage = async () => {
         return redirect("/");
     }
 
+    // Note: This will be translated on the client side when the course edit page loads
     const course = await db.course.create({
         data: {
             userId,
-            title: "كورس غير معرفة",
+            title: "Untitled Course", // This will be replaced with translation in the edit form
         }
     });
 

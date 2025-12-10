@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { Edit, Search, Wallet } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/lib/contexts/language-context";
 
 interface User {
     id: string;
@@ -20,6 +21,7 @@ interface User {
 }
 
 const TeacherBalancesPage = () => {
+    const { t } = useLanguage();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -47,13 +49,13 @@ const TeacherBalancesPage = () => {
 
     const handleBalanceUpdate = async () => {
         if (!selectedUser || !newBalance) {
-            toast.error("يرجى إدخال رصيد جديد");
+            toast.error(t("teacher.balances.errors.enterBalance"));
             return;
         }
 
         const balance = parseFloat(newBalance);
         if (isNaN(balance) || balance < 0) {
-            toast.error("يرجى إدخال رصيد صحيح");
+            toast.error(t("teacher.balances.errors.validBalance"));
             return;
         }
 
@@ -67,17 +69,17 @@ const TeacherBalancesPage = () => {
             });
 
             if (response.ok) {
-                toast.success("تم تحديث الرصيد بنجاح");
+                toast.success(t("teacher.balances.errors.updateSuccess"));
                 setNewBalance("");
                 setIsDialogOpen(false);
                 setSelectedUser(null);
                 fetchUsers(); // Refresh the list
             } else {
-                toast.error("حدث خطأ أثناء تحديث الرصيد");
+                toast.error(t("teacher.balances.errors.updateError"));
             }
         } catch (error) {
             console.error("Error updating balance:", error);
-            toast.error("حدث خطأ أثناء تحديث الرصيد");
+            toast.error(t("teacher.balances.errors.updateError"));
         }
     };
 
@@ -91,7 +93,7 @@ const TeacherBalancesPage = () => {
     if (loading) {
         return (
             <div className="p-6">
-                <div className="text-center">جاري التحميل...</div>
+                <div className="text-center">{t("common.loading")}</div>
             </div>
         );
     }
@@ -100,7 +102,7 @@ const TeacherBalancesPage = () => {
         <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    إدارة الأرصدة
+                    {t("teacher.balances.title")}
                 </h1>
             </div>
 
@@ -108,11 +110,11 @@ const TeacherBalancesPage = () => {
             {studentUsers.length > 0 && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>قائمة الطلاب</CardTitle>
+                        <CardTitle>{t("teacher.balances.studentsTitle")}</CardTitle>
                         <div className="flex items-center space-x-2">
                             <Search className="h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="البحث بالاسم أو رقم الهاتف..."
+                                placeholder={t("teacher.balances.searchPlaceholder")}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="max-w-sm"
@@ -123,11 +125,11 @@ const TeacherBalancesPage = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="text-right">الاسم</TableHead>
-                                    <TableHead className="text-right">رقم الهاتف</TableHead>
-                                    <TableHead className="text-right">الدور</TableHead>
-                                    <TableHead className="text-right">الرصيد الحالي</TableHead>
-                                    <TableHead className="text-right">الإجراءات</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.balances.table.name")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.balances.table.phoneNumber")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.balances.table.role")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.balances.table.currentBalance")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.balances.table.actions")}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -139,13 +141,13 @@ const TeacherBalancesPage = () => {
                                         <TableCell>{user.phoneNumber}</TableCell>
                                         <TableCell>
                                             <Badge variant="secondary">
-                                                طالب
+                                                {t("teacher.users.roles.student")}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className="flex items-center gap-1">
                                                 <Wallet className="h-3 w-3" />
-                                                {user.balance} جنيه
+                                                {user.balance} {t("dashboard.egp")}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
@@ -159,7 +161,7 @@ const TeacherBalancesPage = () => {
                                                 }}
                                             >
                                                 <Edit className="h-4 w-4" />
-                                                تعديل الرصيد
+                                                {t("teacher.balances.edit.update")}
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -174,7 +176,7 @@ const TeacherBalancesPage = () => {
                 <Card>
                     <CardContent className="p-6">
                         <div className="text-center text-muted-foreground">
-                            لا توجد طلاب متاحين
+                            {t("teacher.balances.empty")}
                         </div>
                     </CardContent>
                 </Card>
@@ -194,18 +196,18 @@ const TeacherBalancesPage = () => {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>
-                            تعديل رصيد {selectedUser?.fullName}
+                            {t("teacher.balances.edit.title", { name: selectedUser?.fullName || "" })}
                         </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="newBalance">الرصيد الجديد (جنيه)</Label>
+                            <Label htmlFor="newBalance">{t("teacher.balances.edit.newBalance")}</Label>
                             <Input
                                 id="newBalance"
                                 type="number"
                                 value={newBalance}
                                 onChange={(e) => setNewBalance(e.target.value)}
-                                placeholder="أدخل الرصيد الجديد"
+                                placeholder={t("teacher.balances.edit.placeholder")}
                                 min="0"
                                 step="0.01"
                             />
@@ -219,10 +221,10 @@ const TeacherBalancesPage = () => {
                                     setSelectedUser(null);
                                 }}
                             >
-                                إلغاء
+                                {t("common.cancel")}
                             </Button>
                             <Button onClick={handleBalanceUpdate}>
-                                تحديث الرصيد
+                                {t("teacher.balances.edit.update")}
                             </Button>
                         </div>
                     </div>

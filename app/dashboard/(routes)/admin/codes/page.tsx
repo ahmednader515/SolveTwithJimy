@@ -13,6 +13,7 @@ import { Search, Plus, Copy, Check, Ticket } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
+import { useLanguage } from "@/lib/contexts/language-context";
 
 interface Course {
   id: string;
@@ -44,6 +45,7 @@ interface PurchaseCode {
 }
 
 const AdminCodesPage = () => {
+  const { t } = useLanguage();
   const [codes, setCodes] = useState<PurchaseCode[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,11 +69,11 @@ const AdminCodesPage = () => {
         const data = await response.json();
         setCodes(data);
       } else {
-        toast.error("حدث خطأ في تحميل الأكواد");
+        toast.error(t("admin.codes.errors.loadError"));
       }
     } catch (error) {
       console.error("Error fetching codes:", error);
-      toast.error("حدث خطأ في تحميل الأكواد");
+      toast.error(t("admin.codes.errors.loadError"));
     } finally {
       setLoading(false);
     }
@@ -93,7 +95,7 @@ const AdminCodesPage = () => {
 
   const handleGenerateCodes = async () => {
     if (!selectedCourse || !codeCount || parseInt(codeCount) < 1 || parseInt(codeCount) > 100) {
-      toast.error("يرجى اختيار الكورس وعدد الأكواد (1-100)");
+      toast.error(t("admin.codes.errors.selectCourseAndCount"));
       return;
     }
 
@@ -112,18 +114,18 @@ const AdminCodesPage = () => {
 
       if (response.ok) {
         const data = await response.json();
-        toast.success(`تم إنشاء ${data.count} كود بنجاح`);
+        toast.success(t("admin.codes.errors.generateSuccess", { count: data.count }));
         setIsDialogOpen(false);
         setSelectedCourse("");
         setCodeCount("1");
         fetchCodes(); // Refresh the list
       } else {
         const error = await response.text();
-        toast.error(error || "حدث خطأ أثناء إنشاء الأكواد");
+        toast.error(error || t("admin.codes.errors.generateError"));
       }
     } catch (error) {
       console.error("Error generating codes:", error);
-      toast.error("حدث خطأ أثناء إنشاء الأكواد");
+      toast.error(t("admin.codes.errors.generateError"));
     } finally {
       setIsGenerating(false);
     }
@@ -133,10 +135,10 @@ const AdminCodesPage = () => {
     try {
       await navigator.clipboard.writeText(code);
       setCopiedCode(code);
-      toast.success("تم نسخ الكود");
+      toast.success(t("admin.codes.errors.copySuccess"));
       setTimeout(() => setCopiedCode(null), 2000);
     } catch (error) {
-      toast.error("فشل نسخ الكود");
+      toast.error(t("admin.codes.errors.copyError"));
     }
   };
 
@@ -155,7 +157,7 @@ const AdminCodesPage = () => {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="text-center">جاري التحميل...</div>
+        <div className="text-center">{t("common.loading")}</div>
       </div>
     );
   }
@@ -163,10 +165,10 @@ const AdminCodesPage = () => {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">إدارة الأكواد</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t("admin.codes.title")}</h1>
         <Button onClick={() => setIsDialogOpen(true)} className="bg-brand hover:bg-brand/90">
           <Plus className="h-4 w-4 ml-2" />
-          إنشاء أكواد جديدة
+          {t("admin.codes.createNew")}
         </Button>
       </div>
 
@@ -177,20 +179,20 @@ const AdminCodesPage = () => {
             <div className="flex items-center space-x-2 flex-1">
               <Search className="h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="البحث بالكود أو اسم الكورس أو المنشئ..."
+                placeholder={t("admin.codes.searchPlaceholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="max-w-sm"
               />
             </div>
             <div className="flex items-center space-x-2">
-              <Label htmlFor="course-filter" className="whitespace-nowrap">تصفية حسب الكورس:</Label>
+              <Label htmlFor="course-filter" className="whitespace-nowrap">{t("admin.codes.filterByCourse")}</Label>
               <Select value={courseFilter} onValueChange={setCourseFilter}>
                 <SelectTrigger id="course-filter" className="w-[250px]">
-                  <SelectValue placeholder="جميع الكورسات" />
+                  <SelectValue placeholder={t("admin.codes.allCourses")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">جميع الكورسات</SelectItem>
+                  <SelectItem value="all">{t("admin.codes.allCourses")}</SelectItem>
                   {courses.map((course) => (
                     <SelectItem key={course.id} value={course.id}>
                       {course.title}
@@ -207,7 +209,7 @@ const AdminCodesPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">إجمالي الأكواد</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("admin.codes.statistics.totalCodes")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{filteredCodes.length}</div>
@@ -215,7 +217,7 @@ const AdminCodesPage = () => {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">أكواد غير مستخدمة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("admin.codes.statistics.unusedCodes")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{unusedCodes.length}</div>
@@ -223,7 +225,7 @@ const AdminCodesPage = () => {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">أكواد مستخدمة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("admin.codes.statistics.usedCodes")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-600">{usedCodes.length}</div>
@@ -234,25 +236,25 @@ const AdminCodesPage = () => {
       {/* Codes Table */}
       <Card>
         <CardHeader>
-          <CardTitle>قائمة الأكواد</CardTitle>
+          <CardTitle>{t("admin.codes.codesList")}</CardTitle>
         </CardHeader>
         <CardContent>
           {filteredCodes.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              لا توجد أكواد
+              {t("admin.codes.empty")}
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right">الكود</TableHead>
-                  <TableHead className="text-right">الكورس</TableHead>
-                  <TableHead className="text-right">المنشئ</TableHead>
-                  <TableHead className="text-right">الحالة</TableHead>
-                  <TableHead className="text-right">المستخدم</TableHead>
-                  <TableHead className="text-right">تاريخ الاستخدام</TableHead>
-                  <TableHead className="text-right">تاريخ الإنشاء</TableHead>
-                  <TableHead className="text-right">الإجراءات</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.code")}</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.course")}</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.creator")}</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.status")}</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.user")}</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.usedAt")}</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.createdAt")}</TableHead>
+                  <TableHead className="rtl:text-right ltr:text-left">{t("admin.codes.table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -286,7 +288,7 @@ const AdminCodesPage = () => {
                     </TableCell>
                     <TableCell>
                       <Badge variant={code.isUsed ? "secondary" : "default"}>
-                        {code.isUsed ? "مستخدم" : "غير مستخدم"}
+                        {code.isUsed ? t("admin.codes.status.used") : t("admin.codes.status.unused")}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -328,14 +330,14 @@ const AdminCodesPage = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>إنشاء أكواد جديدة</DialogTitle>
+            <DialogTitle>{t("admin.codes.generate.title")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="course" className="mb-2 block">الكورس</Label>
+              <Label htmlFor="course" className="mb-2 block">{t("admin.codes.generate.course")}</Label>
               <Select value={selectedCourse} onValueChange={setSelectedCourse}>
                 <SelectTrigger>
-                  <SelectValue placeholder="اختر الكورس" />
+                  <SelectValue placeholder={t("admin.codes.generate.selectCourse")} />
                 </SelectTrigger>
                 <SelectContent>
                   {courses.map((course) => (
@@ -347,7 +349,7 @@ const AdminCodesPage = () => {
               </Select>
             </div>
             <div>
-              <Label htmlFor="count" className="mb-2 block">عدد الأكواد</Label>
+              <Label htmlFor="count" className="mb-2 block">{t("admin.codes.generate.count")}</Label>
               <Input
                 id="count"
                 type="number"
@@ -355,20 +357,20 @@ const AdminCodesPage = () => {
                 max="100"
                 value={codeCount}
                 onChange={(e) => setCodeCount(e.target.value)}
-                placeholder="1-100"
+                placeholder={t("admin.codes.generate.countPlaceholder")}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              إلغاء
+              {t("admin.codes.generate.cancel")}
             </Button>
             <Button
               onClick={handleGenerateCodes}
               disabled={isGenerating || !selectedCourse || !codeCount}
               className="bg-brand hover:bg-brand/90"
             >
-              {isGenerating ? "جاري الإنشاء..." : "إنشاء"}
+              {isGenerating ? t("admin.codes.generate.creating") : t("admin.codes.generate.create")}
             </Button>
           </DialogFooter>
         </DialogContent>

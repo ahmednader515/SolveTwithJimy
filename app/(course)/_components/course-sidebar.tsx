@@ -5,6 +5,7 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import { CheckCircle, Circle } from "lucide-react";
 import axios from "axios";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/contexts/language-context";
 
 interface Chapter {
   id: string;
@@ -56,6 +57,7 @@ export const CourseSidebar = ({ course }: CourseSidebarProps) => {
   const router = useRouter();
   const params = useParams();
   const pathname = usePathname();
+  const { t } = useLanguage();
   const [courseContent, setCourseContent] = useState<CourseContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -170,12 +172,12 @@ export const CourseSidebar = ({ course }: CourseSidebarProps) => {
               <span className="rtl:text-right ltr:text-left flex-grow mr-1">
                 {content.title}
                 {content.type === 'quiz' && (
-                  <span className="ml-2 text-xs text-green-600">(اختبار)</span>
+                  <span className="ml-2 text-xs text-green-600">({t("course.quiz")})</span>
                 )}
               </span>
               {content.type === 'chapter' && content.isFree && (
                 <span className="ml-4 px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-800 rounded-full">
-                  مجاني
+                  {t("course.free")}
                 </span>
               )}
             </div>

@@ -10,6 +10,7 @@ import { Search, Edit, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { toast } from "sonner";
+import { useLanguage } from "@/lib/contexts/language-context";
 import {
     Dialog,
     DialogContent,
@@ -63,6 +64,7 @@ interface EditUserData {
 }
 
 const UsersPage = () => {
+    const { t } = useLanguage();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -89,14 +91,14 @@ const UsersPage = () => {
             } else {
                 console.error("Error fetching users:", response.status, response.statusText);
                 if (response.status === 403) {
-                    toast.error("ليس لديك صلاحية للوصول إلى هذه الصفحة");
+                    toast.error(t("teacher.users.errors.noAccess"));
                 } else {
-                    toast.error("حدث خطأ في تحميل الطلاب");
+                    toast.error(t("teacher.users.errors.loadError"));
                 }
             }
         } catch (error) {
             console.error("Error fetching users:", error);
-            toast.error("حدث خطأ في تحميل الطلاب");
+            toast.error(t("teacher.users.errors.loadError"));
         } finally {
             setLoading(false);
         }
@@ -126,8 +128,8 @@ const UsersPage = () => {
             });
 
             if (response.ok) {
-                const userType = editingUser.role === "TEACHER" ? "المعلم" : editingUser.role === "ADMIN" ? "المشرف" : "الطالب";
-                toast.success(`تم تحديث بيانات ${userType} بنجاح`);
+                const roleKey = editingUser.role === "TEACHER" ? "teacher" : editingUser.role === "ADMIN" ? "admin" : "student";
+                toast.success(t("teacher.users.errors.updateSuccess", { role: t(`teacher.users.roles.${roleKey}`) }));
                 setIsEditDialogOpen(false);
                 setEditingUser(null);
                 fetchUsers(); // Refresh the list
@@ -135,18 +137,18 @@ const UsersPage = () => {
                 const error = await response.text();
                 console.error("Error updating user:", response.status, error);
                 if (response.status === 403) {
-                    toast.error("ليس لديك صلاحية لتعديل البيانات");
+                    toast.error(t("teacher.users.errors.noPermission"));
                 } else if (response.status === 404) {
-                    toast.error("المستخدم غير موجود");
+                    toast.error(t("teacher.users.errors.notFound"));
                 } else if (response.status === 400) {
-                    toast.error(error || "بيانات غير صحيحة");
+                    toast.error(error || t("teacher.users.errors.invalidData"));
                 } else {
-                    toast.error("حدث خطأ في تحديث البيانات");
+                    toast.error(t("teacher.users.errors.updateError"));
                 }
             }
         } catch (error) {
             console.error("Error updating user:", error);
-            toast.error("حدث خطأ في تحديث بيانات الطالب");
+            toast.error(t("teacher.users.errors.updateError"));
         }
     };
 
@@ -158,22 +160,22 @@ const UsersPage = () => {
             });
 
             if (response.ok) {
-                toast.success("تم حذف المستخدم بنجاح");
+                toast.success(t("teacher.users.errors.deleteSuccess"));
                 fetchUsers(); // Refresh the list
             } else {
                 const error = await response.text();
                 console.error("Error deleting user:", response.status, error);
                 if (response.status === 403) {
-                    toast.error("ليس لديك صلاحية لحذف المستخدم");
+                    toast.error(t("teacher.users.errors.noPermissionDelete"));
                 } else if (response.status === 404) {
-                    toast.error("المستخدم غير موجود");
+                    toast.error(t("teacher.users.errors.notFound"));
                 } else {
-                    toast.error(error || "حدث خطأ في حذف المستخدم");
+                    toast.error(error || t("teacher.users.errors.deleteError"));
                 }
             }
         } catch (error) {
             console.error("Error deleting user:", error);
-            toast.error("حدث خطأ في حذف الطالب");
+            toast.error(t("teacher.users.errors.deleteError"));
         } finally {
             setIsDeleting(false);
         }
@@ -198,7 +200,7 @@ const UsersPage = () => {
     if (loading) {
         return (
             <div className="p-6">
-                <div className="text-center">جاري التحميل...</div>
+                <div className="text-center">{t("common.loading")}</div>
             </div>
         );
     }
@@ -207,7 +209,7 @@ const UsersPage = () => {
         <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    إدارة المستخدمين
+                    {t("teacher.users.title")}
                 </h1>
             </div>
 
@@ -215,11 +217,11 @@ const UsersPage = () => {
             {staffUsers.length > 0 && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>المشرفين والمعلمين</CardTitle>
+                        <CardTitle>{t("teacher.users.staffTitle")}</CardTitle>
                         <div className="flex items-center space-x-2">
                             <Search className="h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="البحث بالاسم أو رقم الهاتف..."
+                                placeholder={t("teacher.users.searchPlaceholder")}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="max-w-sm"
@@ -230,12 +232,12 @@ const UsersPage = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="text-right">الاسم</TableHead>
-                                    <TableHead className="text-right">رقم الهاتف</TableHead>
-                                    <TableHead className="text-right">رقم هاتف الوالد</TableHead>
-                                    <TableHead className="text-right">الدور</TableHead>
-                                    <TableHead className="text-right">تاريخ التسجيل</TableHead>
-                                    <TableHead className="text-right">الإجراءات</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.name")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.phoneNumber")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.parentPhoneNumber")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.role")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.registrationDate")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.actions")}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -255,8 +257,8 @@ const UsersPage = () => {
                                                     ""
                                                 }
                                             >
-                                                {user.role === "TEACHER" ? "معلم" : 
-                                                 user.role === "ADMIN" ? "مشرف" : user.role}
+                                                {user.role === "TEACHER" ? t("teacher.users.roles.teacher") : 
+                                                 user.role === "ADMIN" ? t("teacher.users.roles.admin") : user.role}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
@@ -281,15 +283,15 @@ const UsersPage = () => {
                                                     </DialogTrigger>
                                                     <DialogContent>
                                                         <DialogHeader>
-                                                            <DialogTitle>تعديل بيانات {user.role === "TEACHER" ? "المعلم" : "المشرف"}</DialogTitle>
+                                                            <DialogTitle>{t("teacher.users.edit.title", { role: user.role === "TEACHER" ? t("teacher.users.roles.teacher") : t("teacher.users.roles.admin") })}</DialogTitle>
                                                             <DialogDescription>
-                                                                قم بتعديل معلومات {user.role === "TEACHER" ? "المعلم" : "المشرف"}
+                                                                {t("teacher.users.edit.description", { role: user.role === "TEACHER" ? t("teacher.users.roles.teacher") : t("teacher.users.roles.admin") })}
                                                             </DialogDescription>
                                                         </DialogHeader>
                                                         <div className="grid gap-4 py-4">
                                                             <div className="grid grid-cols-4 items-center gap-4">
                                                                 <Label htmlFor="fullName" className="text-right">
-                                                                    الاسم
+                                                                    {t("auth.fullName")}
                                                                 </Label>
                                                                 <Input
                                                                     id="fullName"
@@ -300,7 +302,7 @@ const UsersPage = () => {
                                                             </div>
                                                             <div className="grid grid-cols-4 items-center gap-4">
                                                                 <Label htmlFor="phoneNumber" className="text-right">
-                                                                    رقم الهاتف
+                                                                    {t("auth.phoneNumber")}
                                                                 </Label>
                                                                 <Input
                                                                     id="phoneNumber"
@@ -311,7 +313,7 @@ const UsersPage = () => {
                                                             </div>
                                                             <div className="grid grid-cols-4 items-center gap-4">
                                                                 <Label htmlFor="parentPhoneNumber" className="text-right">
-                                                                    رقم هاتف الوالد
+                                                                    {t("auth.parentPhoneNumber")}
                                                                 </Label>
                                                                 <Input
                                                                     id="parentPhoneNumber"
@@ -322,19 +324,19 @@ const UsersPage = () => {
                                                             </div>
                                                             <div className="grid grid-cols-4 items-center gap-4">
                                                                 <Label htmlFor="role" className="text-right">
-                                                                    الدور
+                                                                    {t("teacher.users.table.role")}
                                                                 </Label>
                                                                 <Select
                                                                     value={editData.role}
                                                                     onValueChange={(value) => setEditData({...editData, role: value})}
                                                                 >
                                                                     <SelectTrigger className="col-span-3">
-                                                                        <SelectValue placeholder="اختر الدور" />
+                                                                        <SelectValue placeholder={t("teacher.users.edit.selectRole")} />
                                                                     </SelectTrigger>
                                                                     <SelectContent>
-                                                                        <SelectItem value="USER">طالب</SelectItem>
-                                                                        <SelectItem value="TEACHER">معلم</SelectItem>
-                                                                        <SelectItem value="ADMIN">مشرف</SelectItem>
+                                                                        <SelectItem value="USER">{t("teacher.users.roles.student")}</SelectItem>
+                                                                        <SelectItem value="TEACHER">{t("teacher.users.roles.teacher")}</SelectItem>
+                                                                        <SelectItem value="ADMIN">{t("teacher.users.roles.admin")}</SelectItem>
                                                                     </SelectContent>
                                                                 </Select>
                                                             </div>
@@ -344,10 +346,10 @@ const UsersPage = () => {
                                                                 setIsEditDialogOpen(false);
                                                                 setEditingUser(null);
                                                             }}>
-                                                                إلغاء
+                                                                {t("common.cancel")}
                                                             </Button>
                                                             <Button onClick={handleSaveUser}>
-                                                                حفظ التغييرات
+                                                                {t("teacher.users.edit.saveChanges")}
                                                             </Button>
                                                         </DialogFooter>
                                                     </DialogContent>
@@ -365,18 +367,18 @@ const UsersPage = () => {
                                                     </AlertDialogTrigger>
                                                     <AlertDialogContent>
                                                         <AlertDialogHeader>
-                                                            <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+                                                            <AlertDialogTitle>{t("teacher.users.delete.confirm")}</AlertDialogTitle>
                                                             <AlertDialogDescription>
-                                                                هذا الإجراء لا يمكن التراجع عنه. سيتم حذف {user.role === "TEACHER" ? "المعلم" : "المشرف"} وجميع البيانات المرتبطة به نهائياً.
+                                                                {t("teacher.users.delete.description", { role: user.role === "TEACHER" ? t("teacher.users.roles.teacher") : t("teacher.users.roles.admin") })}
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
-                                                            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                                                            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                                                             <AlertDialogAction
                                                                 onClick={() => handleDeleteUser(user.id)}
                                                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                                             >
-                                                                حذف
+                                                                {t("common.delete")}
                                                             </AlertDialogAction>
                                                         </AlertDialogFooter>
                                                     </AlertDialogContent>
@@ -395,11 +397,11 @@ const UsersPage = () => {
             {studentUsers.length > 0 && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>قائمة الطلاب</CardTitle>
+                        <CardTitle>{t("teacher.users.studentsTitle")}</CardTitle>
                         <div className="flex items-center space-x-2">
                             <Search className="h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="البحث بالاسم أو رقم الهاتف..."
+                                placeholder={t("teacher.users.searchPlaceholder")}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="max-w-sm"
@@ -410,14 +412,14 @@ const UsersPage = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="text-right">الاسم</TableHead>
-                                    <TableHead className="text-right">رقم الهاتف</TableHead>
-                                    <TableHead className="text-right">رقم هاتف الوالد</TableHead>
-                                    <TableHead className="text-right">الدور</TableHead>
-                                    <TableHead className="text-right">الرصيد</TableHead>
-                                    <TableHead className="text-right">الكورسات المشتراة</TableHead>
-                                    <TableHead className="text-right">تاريخ التسجيل</TableHead>
-                                    <TableHead className="text-right">الإجراءات</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.name")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.phoneNumber")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.parentPhoneNumber")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.role")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.balance")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.purchasedCourses")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.registrationDate")}</TableHead>
+                                    <TableHead className="rtl:text-right ltr:text-left">{t("teacher.users.table.actions")}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -433,12 +435,12 @@ const UsersPage = () => {
                                                 variant="secondary"
                                                 className="bg-green-600 text-white hover:bg-green-700"
                                             >
-                                                طالب
+                                                {t("teacher.users.roles.student")}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant="secondary">
-                                                {user.balance} جنيه
+                                                {user.balance} {t("dashboard.egp")}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
@@ -468,15 +470,15 @@ const UsersPage = () => {
                                                     </DialogTrigger>
                                                     <DialogContent>
                                                         <DialogHeader>
-                                                            <DialogTitle>تعديل بيانات الطالب</DialogTitle>
+                                                            <DialogTitle>{t("teacher.users.edit.studentTitle")}</DialogTitle>
                                                             <DialogDescription>
-                                                                قم بتعديل معلومات الطالب
+                                                                {t("teacher.users.edit.studentDescription")}
                                                             </DialogDescription>
                                                         </DialogHeader>
                                                         <div className="grid gap-4 py-4">
                                                             <div className="grid grid-cols-4 items-center gap-4">
                                                                 <Label htmlFor="fullName" className="text-right">
-                                                                    الاسم
+                                                                    {t("auth.fullName")}
                                                                 </Label>
                                                                 <Input
                                                                     id="fullName"
@@ -487,7 +489,7 @@ const UsersPage = () => {
                                                             </div>
                                                             <div className="grid grid-cols-4 items-center gap-4">
                                                                 <Label htmlFor="phoneNumber" className="text-right">
-                                                                    رقم الهاتف
+                                                                    {t("auth.phoneNumber")}
                                                                 </Label>
                                                                 <Input
                                                                     id="phoneNumber"
@@ -498,7 +500,7 @@ const UsersPage = () => {
                                                             </div>
                                                             <div className="grid grid-cols-4 items-center gap-4">
                                                                 <Label htmlFor="parentPhoneNumber" className="text-right">
-                                                                    رقم هاتف الوالد
+                                                                    {t("auth.parentPhoneNumber")}
                                                                 </Label>
                                                                 <Input
                                                                     id="parentPhoneNumber"
@@ -509,19 +511,19 @@ const UsersPage = () => {
                                                             </div>
                                                             <div className="grid grid-cols-4 items-center gap-4">
                                                                 <Label htmlFor="role" className="text-right">
-                                                                    الدور
+                                                                    {t("teacher.users.table.role")}
                                                                 </Label>
                                                                 <Select
                                                                     value={editData.role}
                                                                     onValueChange={(value) => setEditData({...editData, role: value})}
                                                                 >
                                                                     <SelectTrigger className="col-span-3">
-                                                                        <SelectValue placeholder="اختر الدور" />
+                                                                        <SelectValue placeholder={t("teacher.users.edit.selectRole")} />
                                                                     </SelectTrigger>
                                                                     <SelectContent>
-                                                                        <SelectItem value="USER">طالب</SelectItem>
-                                                                        <SelectItem value="TEACHER">معلم</SelectItem>
-                                                                        <SelectItem value="ADMIN">مشرف</SelectItem>
+                                                                        <SelectItem value="USER">{t("teacher.users.roles.student")}</SelectItem>
+                                                                        <SelectItem value="TEACHER">{t("teacher.users.roles.teacher")}</SelectItem>
+                                                                        <SelectItem value="ADMIN">{t("teacher.users.roles.admin")}</SelectItem>
                                                                     </SelectContent>
                                                                 </Select>
                                                             </div>
@@ -531,10 +533,10 @@ const UsersPage = () => {
                                                                 setIsEditDialogOpen(false);
                                                                 setEditingUser(null);
                                                             }}>
-                                                                إلغاء
+                                                                {t("common.cancel")}
                                                             </Button>
                                                             <Button onClick={handleSaveUser}>
-                                                                حفظ التغييرات
+                                                                {t("teacher.users.edit.saveChanges")}
                                                             </Button>
                                                         </DialogFooter>
                                                     </DialogContent>
@@ -552,18 +554,18 @@ const UsersPage = () => {
                                                     </AlertDialogTrigger>
                                                     <AlertDialogContent>
                                                         <AlertDialogHeader>
-                                                            <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+                                                            <AlertDialogTitle>{t("teacher.users.delete.confirm")}</AlertDialogTitle>
                                                             <AlertDialogDescription>
-                                                                هذا الإجراء لا يمكن التراجع عنه. سيتم حذف الطالب وجميع البيانات المرتبطة به نهائياً.
+                                                                {t("teacher.users.delete.studentDescription")}
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
-                                                            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                                                            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                                                             <AlertDialogAction
                                                                 onClick={() => handleDeleteUser(user.id)}
                                                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                                             >
-                                                                حذف
+                                                                {t("common.delete")}
                                                             </AlertDialogAction>
                                                         </AlertDialogFooter>
                                                     </AlertDialogContent>
@@ -582,7 +584,7 @@ const UsersPage = () => {
                 <Card>
                     <CardContent className="p-6">
                         <div className="text-center text-muted-foreground">
-                            لا يوجد مستخدمين مسجلين حالياً
+                            {t("teacher.users.empty")}
                         </div>
                     </CardContent>
                 </Card>

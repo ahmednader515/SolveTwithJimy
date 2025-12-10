@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, BookOpen, User, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/lib/contexts/language-context";
 
 interface User {
     id: string;
@@ -29,6 +30,7 @@ interface Course {
 }
 
 const TeacherAddCoursesPage = () => {
+    const { t } = useLanguage();
     const [users, setUsers] = useState<User[]>([]);
     const [courses, setCourses] = useState<Course[]>([]);
     const [ownedCourses, setOwnedCourses] = useState<Course[]>([]);
@@ -98,7 +100,7 @@ const TeacherAddCoursesPage = () => {
 
     const handleAddCourse = async () => {
         if (!selectedUser || !selectedCourse) {
-            toast.error("يرجى اختيار الطالب والكورس");
+            toast.error(t("teacher.addCourses.errors.selectStudentCourse"));
             return;
         }
 
@@ -113,18 +115,18 @@ const TeacherAddCoursesPage = () => {
             });
 
             if (response.ok) {
-                toast.success("تم إضافة الكورس للطالب بنجاح");
+                toast.success(t("teacher.addCourses.errors.addSuccess"));
                 setIsDialogOpen(false);
                 setSelectedUser(null);
                 setSelectedCourse("");
                 fetchUsers(); // Refresh the list
             } else {
                 const error = await response.json();
-                toast.error(error.message || "حدث خطأ أثناء إضافة الكورس");
+                toast.error(error.message || t("teacher.addCourses.errors.addError"));
             }
         } catch (error) {
             console.error("Error adding course:", error);
-            toast.error("حدث خطأ أثناء إضافة الكورس");
+            toast.error(t("teacher.addCourses.errors.addError"));
         } finally {
             setIsAddingCourse(false);
         }
@@ -132,7 +134,7 @@ const TeacherAddCoursesPage = () => {
 
     const handleDeleteCourse = async () => {
         if (!selectedUser || !selectedCourse) {
-            toast.error("يرجى اختيار الطالب والكورس");
+            toast.error(t("teacher.addCourses.errors.selectStudentCourse"));
             return;
         }
 
@@ -144,18 +146,18 @@ const TeacherAddCoursesPage = () => {
                 body: JSON.stringify({ courseId: selectedCourse })
             });
             if (res.ok) {
-                toast.success("تم حذف الكورس من الطالب بنجاح");
+                toast.success(t("teacher.addCourses.errors.deleteSuccess"));
                 setIsDialogOpen(false);
                 setSelectedCourse("");
                 setSelectedUser(null);
                 fetchUsers();
             } else {
                 const data = await res.json().catch(() => ({} as any));
-                toast.error((data as any).error || "حدث خطأ أثناء حذف الكورس");
+                toast.error((data as any).error || t("teacher.addCourses.errors.deleteError"));
             }
         } catch (error) {
             console.error("Error deleting course:", error);
-            toast.error("حدث خطأ أثناء حذف الكورس");
+            toast.error(t("teacher.addCourses.errors.deleteError"));
         } finally {
             setIsDeletingCourse(false);
         }
@@ -169,7 +171,7 @@ const TeacherAddCoursesPage = () => {
     if (loading) {
         return (
             <div className="p-6">
-                <div className="text-center">جاري التحميل...</div>
+                <div className="text-center">{t("common.loading")}</div>
             </div>
         );
     }
@@ -178,17 +180,17 @@ const TeacherAddCoursesPage = () => {
         <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    اضافة و حذف الكورسات للطلاب
+                    {t("teacher.addCourses.title")}
                 </h1>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>قائمة الطلاب</CardTitle>
+                    <CardTitle>{t("teacher.addCourses.studentsTitle")}</CardTitle>
                     <div className="flex items-center space-x-2">
                         <Search className="h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="البحث بالاسم أو رقم الهاتف..."
+                            placeholder={t("teacher.addCourses.searchPlaceholder")}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="max-w-sm"
@@ -199,11 +201,11 @@ const TeacherAddCoursesPage = () => {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="text-right">الاسم</TableHead>
-                                <TableHead className="text-right">رقم الهاتف</TableHead>
-                                <TableHead className="text-right">الدور</TableHead>
-                                <TableHead className="text-right">الكورسات المشتراة</TableHead>
-                                <TableHead className="text-right">الإجراءات</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.addCourses.table.name")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.addCourses.table.phoneNumber")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.addCourses.table.role")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.addCourses.table.purchasedCourses")}</TableHead>
+                                <TableHead className="rtl:text-right ltr:text-left">{t("teacher.addCourses.table.actions")}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -215,7 +217,7 @@ const TeacherAddCoursesPage = () => {
                                     <TableCell>{user.phoneNumber}</TableCell>
                                     <TableCell>
                                         <Badge variant="secondary">
-                                            طالب
+                                            {t("teacher.users.roles.student")}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
@@ -234,7 +236,7 @@ const TeacherAddCoursesPage = () => {
                                                 }}
                                             >
                                                 <Plus className="h-4 w-4" />
-                                                إضافة كورس
+                                                {t("teacher.addCourses.add.button")}
                                             </Button>
                                             <Button 
                                                 size="sm" 
@@ -246,7 +248,7 @@ const TeacherAddCoursesPage = () => {
                                                     setIsDialogOpen(true);
                                                 }}
                                             >
-                                                حذف الكورس
+                                                {t("teacher.addCourses.delete.button")}
                                             </Button>
                                         </div>
                                     </TableCell>
@@ -261,7 +263,7 @@ const TeacherAddCoursesPage = () => {
                 <Card>
                     <CardContent className="p-6">
                         <div className="text-center text-muted-foreground">
-                            لا توجد طلاب متاحين
+                            {t("teacher.addCourses.empty")}
                         </div>
                     </CardContent>
                 </Card>
@@ -283,18 +285,18 @@ const TeacherAddCoursesPage = () => {
                     <DialogHeader>
                         <DialogTitle>
                             {dialogMode === "add" ? (
-                                <>إضافة كورس لـ {selectedUser?.fullName}</>
+                                <>{t("teacher.addCourses.add.title", { name: selectedUser?.fullName || "" })}</>
                             ) : (
-                                <>حذف كورس من {selectedUser?.fullName}</>
+                                <>{t("teacher.addCourses.delete.title", { name: selectedUser?.fullName || "" })}</>
                             )}
                         </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">اختر الكورس</label>
+                            <label className="text-sm font-medium">{t("teacher.addCourses.add.selectCourse")}</label>
                             <Select value={selectedCourse} onValueChange={setSelectedCourse}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="اختر كورس..." />
+                                    <SelectValue placeholder={t("teacher.addCourses.add.selectPlaceholder")} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {(dialogMode === "delete" ? ownedCourses : courses).map((course) => (
@@ -303,7 +305,7 @@ const TeacherAddCoursesPage = () => {
                                                 <span>{course.title}</span>
                                                 {typeof course.price === "number" && (
                                                     <Badge variant="outline" className="mr-2">
-                                                        {course.price} جنيه
+                                                        {course.price} {t("dashboard.egp")}
                                                     </Badge>
                                                 )}
                                             </div>
@@ -322,14 +324,14 @@ const TeacherAddCoursesPage = () => {
                                     setDialogMode("add");
                                 }}
                             >
-                                إلغاء
+                                {t("common.cancel")}
                             </Button>
                             {dialogMode === "add" ? (
                                 <Button 
                                     onClick={handleAddCourse}
                                     disabled={!selectedCourse || isAddingCourse}
                                 >
-                                    {isAddingCourse ? "جاري الإضافة..." : "إضافة الكورس"}
+                                    {isAddingCourse ? t("teacher.addCourses.add.adding") : t("teacher.addCourses.add.addCourse")}
                                 </Button>
                             ) : (
                                 <Button 
@@ -337,7 +339,7 @@ const TeacherAddCoursesPage = () => {
                                     onClick={handleDeleteCourse}
                                     disabled={!selectedCourse || isDeletingCourse}
                                 >
-                                    {isDeletingCourse ? "جاري الحذف..." : "حذف الكورس"}
+                                    {isDeletingCourse ? t("teacher.addCourses.delete.deleting") : t("teacher.addCourses.delete.button")}
                                 </Button>
                             )}
                         </div>
