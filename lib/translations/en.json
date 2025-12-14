@@ -5,6 +5,12 @@
     "dashboard": "Dashboard",
     "logout": "Logout"
   },
+  "recaptchaGate": {
+    "title": "Security Verification",
+    "description": "Please complete the security check to continue",
+    "verifying": "Verifying...",
+    "helpText": "This verification helps protect our platform from automated access"
+  },
   "auth": {
     "signIn": "Sign In",
     "signUp": "Sign Up",
