@@ -4,10 +4,32 @@ import { db } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
-    const { fullName, phoneNumber, parentPhoneNumber, password, confirmPassword } = await req.json();
+    const { fullName, phoneNumber, parentPhoneNumber, password, confirmPassword, recaptchaToken } = await req.json();
 
     if (!fullName || !phoneNumber || !parentPhoneNumber || !password || !confirmPassword) {
       return new NextResponse("Missing required fields", { status: 400 });
+    }
+
+    // Verify reCAPTCHA token
+    if (!recaptchaToken) {
+      return new NextResponse("reCAPTCHA verification is required", { status: 400 });
+    }
+
+    const recaptchaSecretKey = process.env.RECAPTCHA_SECRET_KEY;
+    if (!recaptchaSecretKey) {
+      console.error("RECAPTCHA_SECRET_KEY is not set");
+      return new NextResponse("Server configuration error", { status: 500 });
+    }
+
+    const recaptchaVerificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${recaptchaToken}`;
+    const recaptchaResponse = await fetch(recaptchaVerificationUrl, {
+      method: "POST",
+    });
+
+    const recaptchaData = await recaptchaResponse.json();
+
+    if (!recaptchaData.success) {
+      return new NextResponse("reCAPTCHA verification failed", { status: 400 });
     }
 
     if (password !== confirmPassword) {
