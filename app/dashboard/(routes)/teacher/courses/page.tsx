@@ -11,9 +11,6 @@ const CoursesPage = async () => {
     }
 
     const courses = await db.course.findMany({
-        where: {
-            userId,
-        },
         include: {
             chapters: {
                 select: {

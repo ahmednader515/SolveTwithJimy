@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Eye, EyeOff, UserPlus, ArrowLeft, CheckCircle } from "lucide-react";
 import Link from "next/link";
@@ -32,6 +33,7 @@ export default function CreateAccountPage() {
     parentPhoneNumber: "",
     password: "",
     confirmPassword: "",
+    grade: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,8 +63,17 @@ export default function CreateAccountPage() {
       return;
     }
 
+    if (!formData.grade) {
+      toast.error(t("auth.errors.selectGradeError"));
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const response = await axios.post("/api/admin/create-account", formData);
+      const response = await axios.post("/api/admin/create-account", {
+        ...formData,
+        grade: parseInt(formData.grade),
+      });
       
       if (response.data.success) {
         setCreatedUser(response.data.user);
@@ -74,6 +85,7 @@ export default function CreateAccountPage() {
           parentPhoneNumber: "",
           password: "",
           confirmPassword: "",
+          grade: "",
         });
       }
     } catch (error) {
@@ -106,6 +118,7 @@ export default function CreateAccountPage() {
       parentPhoneNumber: "",
       password: "",
       confirmPassword: "",
+      grade: "",
     });
     setCreatedUser(null);
   };
@@ -209,6 +222,20 @@ export default function CreateAccountPage() {
                   />
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="grade">{t("auth.grade")}</Label>
+                  <Select value={formData.grade} onValueChange={(value) => setFormData(prev => ({ ...prev, grade: value }))} disabled={isLoading}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("auth.selectGrade")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="9">{t("auth.grade9")}</SelectItem>
+                      <SelectItem value="10">{t("auth.grade10")}</SelectItem>
+                      <SelectItem value="11">{t("auth.grade11")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="password">{t("admin.createAccount.form.password")}</Label>
@@ -288,7 +315,7 @@ export default function CreateAccountPage() {
                 <div className="flex gap-4">
                   <Button
                     type="submit"
-                    disabled={isLoading || !passwordChecks.isValid}
+                    disabled={isLoading || !passwordChecks.isValid || !formData.grade}
                     className="flex-1 bg-brand hover:bg-brand/90 text-white"
                   >
                     {isLoading ? t("admin.createAccount.form.creating") : t("admin.createAccount.form.createAccount")}

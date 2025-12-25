@@ -14,10 +14,13 @@ export async function PATCH(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
+        const { user } = await auth();
+        
+        // Allow admins and teachers to publish/unpublish any course
         const course = await db.course.findUnique({
             where: {
                 id: resolvedParams.courseId,
-                userId
+                ...(user?.role !== "ADMIN" && user?.role !== "TEACHER" ? { userId } : {})
             },
             include: {
                 chapters: true
@@ -37,7 +40,6 @@ export async function PATCH(
         const publishedCourse = await db.course.update({
             where: {
                 id: resolvedParams.courseId,
-                userId
             },
             data: {
                 isPublished: !course.isPublished

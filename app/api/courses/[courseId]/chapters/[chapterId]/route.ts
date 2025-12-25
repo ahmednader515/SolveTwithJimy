@@ -159,22 +159,26 @@ export async function DELETE(
     { params }: { params: Promise<{ courseId: string; chapterId: string }> }
 ) {
     try {
-        const { userId } = await auth();
+        const { userId, user } = await auth();
         const resolvedParams = await params;
 
         if (!userId) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
-
-        // Check if user owns the course
-        const courseOwner = await db.course.findUnique({
+        
+        // Check if course exists and user has permission (admin or teacher)
+        const course = await db.course.findUnique({
             where: {
                 id: resolvedParams.courseId,
-                userId: userId,
             }
         });
 
-        if (!courseOwner) {
+        if (!course) {
+            return new NextResponse("Course not found", { status: 404 });
+        }
+
+        // Allow admins and teachers to delete any chapter
+        if (user?.role !== "ADMIN" && user?.role !== "TEACHER") {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 

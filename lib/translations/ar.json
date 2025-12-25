@@ -25,6 +25,11 @@
     "phoneNumber": "رقم الهاتف",
     "parentPhoneNumber": "رقم هاتف الوالد",
     "fullName": "الاسم الكامل",
+    "grade": "الصف",
+    "selectGrade": "اختر الصف",
+    "grade9": "الصف التاسع",
+    "grade10": "الصف العاشر",
+    "grade11": "الصف الحادي عشر",
     "welcomeBack": "مرحباً بك مرة أخرى",
     "welcomeMessage": "سجل دخولك واستكشف الكورسات التعليمية المميزة",
     "signInTitle": "تسجيل الدخول",
@@ -54,7 +59,8 @@
       "samePhone": "رقم الهاتف لا يمكن أن يكون نفس رقم هاتف الوالد",
       "accountCreationError": "حدث خطأ أثناء إنشاء الحساب",
       "signInSuccess": "تم تسجيل الدخول بنجاح",
-      "accountCreated": "تم إنشاء الحساب بنجاح"
+      "accountCreated": "تم إنشاء الحساب بنجاح",
+      "selectGradeError": "يرجى اختيار صفك الدراسي"
     }
   },
   "homepage": {
@@ -639,6 +645,15 @@
         "coursePrice": "سعر الكورس",
         "editPrice": "تعديل السعر",
         "noPrice": "لا يوجد سعر",
+        "courseGrade": "صف الكورس",
+        "editGrade": "تعديل الصف",
+        "noGrade": "لم يتم تحديد صف (جميع الصفوف)",
+        "selectGrade": "اختر الصف (اختياري)",
+        "gradeDisplay": "الصف {grade}",
+        "allGrades": "جميع الصفوف",
+        "grade9": "الصف التاسع",
+        "grade10": "الصف العاشر",
+        "grade11": "الصف الحادي عشر",
         "updateSuccess": "تم تحديث الكورس",
         "updateError": "حدث خطأ",
         "publishSuccess": "تم نشر الكورس",

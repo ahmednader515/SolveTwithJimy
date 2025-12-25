@@ -4,10 +4,15 @@ import { db } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
-    const { fullName, phoneNumber, parentPhoneNumber, password, confirmPassword, recaptchaToken } = await req.json();
+    const { fullName, phoneNumber, parentPhoneNumber, password, confirmPassword, grade, recaptchaToken } = await req.json();
 
-    if (!fullName || !phoneNumber || !parentPhoneNumber || !password || !confirmPassword) {
+    if (!fullName || !phoneNumber || !parentPhoneNumber || !password || !confirmPassword || !grade) {
       return new NextResponse("Missing required fields", { status: 400 });
+    }
+
+    // Validate grade
+    if (![9, 10, 11].includes(grade)) {
+      return new NextResponse("Invalid grade. Must be 9, 10, or 11", { status: 400 });
     }
 
     // Verify reCAPTCHA token
@@ -71,6 +76,7 @@ export async function POST(req: Request) {
         parentPhoneNumber,
         hashedPassword,
         role: "USER",
+        grade: grade,
       },
     });
 

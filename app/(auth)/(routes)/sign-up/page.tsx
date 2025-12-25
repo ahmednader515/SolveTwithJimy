@@ -13,6 +13,7 @@ import Image from "next/image";
 import { useLanguage } from "@/lib/contexts/language-context";
 import ReCAPTCHA from "react-google-recaptcha";
 import { RecaptchaGate } from "@/components/recaptcha-gate";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
 
@@ -30,6 +31,7 @@ export default function SignUpPage() {
     parentPhoneNumber: "",
     password: "",
     confirmPassword: "",
+    grade: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,6 +39,13 @@ export default function SignUpPage() {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleGradeChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      grade: value,
     }));
   };
 
@@ -65,9 +74,16 @@ export default function SignUpPage() {
       return;
     }
 
+    if (!formData.grade) {
+      toast.error(t("auth.errors.selectGradeError"));
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await axios.post("/api/auth/register", {
         ...formData,
+        grade: parseInt(formData.grade),
         recaptchaToken,
       });
       
@@ -202,6 +218,19 @@ export default function SignUpPage() {
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="grade">{t("auth.grade")}</Label>
+              <Select value={formData.grade} onValueChange={handleGradeChange} disabled={isLoading}>
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder={t("auth.selectGrade")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="9">{t("auth.grade9")}</SelectItem>
+                  <SelectItem value="10">{t("auth.grade10")}</SelectItem>
+                  <SelectItem value="11">{t("auth.grade11")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="password">{t("auth.password")}</Label>
               <div className="relative">
                 <Input
@@ -283,7 +312,7 @@ export default function SignUpPage() {
             <Button
               type="submit"
               className="w-full h-10 bg-brand hover:bg-brand/90 text-white"
-              disabled={isLoading || !passwordChecks.isValid || !recaptchaToken}
+              disabled={isLoading || !passwordChecks.isValid || !recaptchaToken || !formData.grade}
             >
               {isLoading ? t("auth.creatingAccount") : t("auth.createAccountButton")}
             </Button>

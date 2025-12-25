@@ -28,7 +28,8 @@ export async function PATCH(
             return new NextResponse("Course not found", { status: 404 });
         }
 
-        if (courseOwner.userId !== userId && user?.role !== "ADMIN") {
+        // Allow admins and teachers to publish/unpublish any chapter
+        if (user?.role !== "ADMIN" && user?.role !== "TEACHER") {
             return new NextResponse("Unauthorized", { status: 403 });
         }
 

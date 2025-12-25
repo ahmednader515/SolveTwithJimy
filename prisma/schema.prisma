@@ -17,6 +17,7 @@ model User {
   hashedPassword          String?
   image                   String?
   role                    String    @default("USER")
+  grade                   Int?      // 9, 10, or 11 for students
   balance                 Float     @default(0)
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
@@ -36,6 +37,7 @@ model Course {
   description String? @db.Text
   imageUrl String? @db.Text
   price Float?
+  grade Int? // 9, 10, 11, or null for all grades
   isPublished Boolean @default(false)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

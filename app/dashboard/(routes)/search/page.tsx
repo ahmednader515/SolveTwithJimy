@@ -25,13 +25,41 @@ export default async function SearchPage({
     const resolvedParams = await searchParams;
     const title = typeof resolvedParams.title === 'string' ? resolvedParams.title : '';
 
-    const courses = await db.course.findMany({
-        where: {
-            isPublished: true,
+    // Get user's grade
+    let userGrade: number | null | undefined;
+    try {
+        const user = await db.user.findUnique({
+            where: { id: session.user.id },
+            select: { grade: true }
+        });
+        userGrade = user?.grade;
+    } catch (error) {
+        // If there's an error (e.g., column doesn't exist yet), treat as no grade
+        console.error("Error fetching user grade:", error);
+        userGrade = null;
+    }
+
+    // Build where clause - show courses that match user's grade or have no grade specified (all grades)
+    const whereClause: any = {
+        isPublished: true,
+        ...(title && {
             title: {
                 contains: title,
             }
-        },
+        })
+    };
+
+    // Filter by grade: show courses with matching grade or null grade (all grades)
+    if (userGrade !== null && userGrade !== undefined) {
+        whereClause.OR = [
+            { grade: userGrade },
+            { grade: null }
+        ];
+    }
+    // If user has no grade, show all courses (don't filter by grade)
+
+    const courses = await db.course.findMany({
+        where: whereClause,
         include: {
             chapters: {
                 where: {

@@ -21,7 +21,15 @@ export default async function CourseIdPage({
         where: {
             id: courseId,
         },
-        include: {
+        select: {
+            id: true,
+            title: true,
+            description: true,
+            imageUrl: true,
+            price: true,
+            grade: true,
+            isPublished: true,
+            userId: true,
             chapters: {
                 orderBy: {
                     position: "asc",
@@ -39,8 +47,8 @@ export default async function CourseIdPage({
         return redirect("/");
     }
 
-    // Only owner or admin can view editor
-    if (user?.role !== "ADMIN" && course.userId !== userId) {
+    // Only teachers and admins can view editor
+    if (user?.role !== "ADMIN" && user?.role !== "TEACHER") {
         return redirect("/dashboard");
     }
 

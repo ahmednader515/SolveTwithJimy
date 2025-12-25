@@ -25,6 +25,11 @@
     "phoneNumber": "Phone Number",
     "parentPhoneNumber": "Parent Phone Number",
     "fullName": "Full Name",
+    "grade": "Grade",
+    "selectGrade": "Select Grade",
+    "grade9": "Grade 9",
+    "grade10": "Grade 10",
+    "grade11": "Grade 11",
     "welcomeBack": "Welcome Back",
     "welcomeMessage": "Sign in and explore our premium educational courses",
     "signInTitle": "Sign In",
@@ -54,7 +59,8 @@
       "samePhone": "Phone number cannot be the same as parent phone number",
       "accountCreationError": "An error occurred while creating the account",
       "signInSuccess": "Successfully signed in",
-      "accountCreated": "Account created successfully"
+      "accountCreated": "Account created successfully",
+      "selectGradeError": "Please select your grade"
     }
   },
   "homepage": {
@@ -639,6 +645,15 @@
         "coursePrice": "Course Price",
         "editPrice": "Edit Price",
         "noPrice": "No price",
+        "courseGrade": "Course Grade",
+        "editGrade": "Edit Grade",
+        "noGrade": "No grade specified (All grades)",
+        "selectGrade": "Select grade (optional)",
+        "gradeDisplay": "Grade {grade}",
+        "allGrades": "All Grades",
+        "grade9": "Grade 9",
+        "grade10": "Grade 10",
+        "grade11": "Grade 11",
         "updateSuccess": "Course updated",
         "updateError": "An error occurred",
         "publishSuccess": "Course published",

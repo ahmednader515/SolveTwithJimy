@@ -26,7 +26,15 @@ export default async function AdminCourseIdPage({
         where: {
             id: courseId,
         },
-        include: {
+        select: {
+            id: true,
+            title: true,
+            description: true,
+            imageUrl: true,
+            price: true,
+            grade: true,
+            isPublished: true,
+            userId: true,
             chapters: {
                 orderBy: {
                     position: "asc",

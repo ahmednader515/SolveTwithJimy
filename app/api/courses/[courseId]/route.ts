@@ -69,7 +69,8 @@ export async function PATCH(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        const whereClause = user?.role === "ADMIN"
+        // Allow admins and teachers to edit any course
+        const whereClause = (user?.role === "ADMIN" || user?.role === "TEACHER")
             ? { id: resolvedParams.courseId }
             : { id: resolvedParams.courseId, userId };
 
@@ -109,8 +110,8 @@ export async function DELETE(
             return new NextResponse("Not found", { status: 404 });
         }
 
-        // Only owner or admin can delete
-        if (user?.role !== "ADMIN" && course.userId !== userId) {
+        // Allow admins and teachers to delete any course
+        if (user?.role !== "ADMIN" && user?.role !== "TEACHER") {
             return new NextResponse("Forbidden", { status: 403 });
         }
 

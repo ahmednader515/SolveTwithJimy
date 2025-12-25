@@ -15,14 +15,21 @@ export async function PUT(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        const courseOwner = await db.course.findUnique({
+        const { user } = await auth();
+        
+        // Check if course exists and user has permission (admin or teacher)
+        const course = await db.course.findUnique({
             where: {
                 id: resolvedParams.courseId,
-                userId: userId,
             }
         });
 
-        if (!courseOwner) {
+        if (!course) {
+            return new NextResponse("Course not found", { status: 404 });
+        }
+
+        // Allow admins and teachers to reorder chapters
+        if (user?.role !== "ADMIN" && user?.role !== "TEACHER") {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
